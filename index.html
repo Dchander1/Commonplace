@@ -92,6 +92,15 @@
     box-shadow:0 8px 24px rgba(0,0,0,0.16);
   }
 
+  .search-bar{margin-bottom:16px;}
+  .search-bar input{
+    width:100%;max-width:360px;
+    font-family:'Source Serif 4', serif;font-size:14px;
+    padding:9px 12px;border:1px solid var(--rule);border-radius:6px;background:#fff;color:var(--ink);
+  }
+  .search-bar input::placeholder{color:var(--muted);}
+  .search-bar input:focus{border-color:var(--accent-2);}
+
   .toolbar{
     display:flex;
     justify-content:space-between;
@@ -372,6 +381,9 @@
   </div>
 
   <div id="listView">
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search titles, people, notes&hellip;">
+  </div>
   <div class="toolbar">
     <div class="filters" id="filters">
       <button class="filter-btn active" data-cat="all">All</button>
@@ -382,8 +394,8 @@
       <button class="filter-btn" data-cat="misc">Misc</button>
     </div>
     <div class="view-toggle" id="viewToggle">
-      <button class="view-btn active" data-view="list">List</button>
-      <button class="view-btn" data-view="grid">Grid</button>
+      <button class="view-btn" data-view="list">List</button>
+      <button class="view-btn active" data-view="grid">Grid</button>
     </div>
   </div>
 
@@ -534,8 +546,9 @@ function heroArt(d){
 }
 let DATA = [];
 let activeCat = 'all';
-let viewMode = 'list';
+let viewMode = 'grid';
 let isAdmin = false;
+let searchQuery = '';
 
 const entriesEl = document.getElementById('entries');
 const emptyEl = document.getElementById('empty');
@@ -600,9 +613,15 @@ function route(){
 window.addEventListener('hashchange', route);
 document.getElementById('articleBack').addEventListener('click', () => { location.hash = ''; });
 
+function matchesSearch(d){
+  if(!searchQuery) return true;
+  const haystack = `${d.title || ''} ${d.by || ''} ${d.verdict || ''} ${d.note || ''}`.toLowerCase();
+  return haystack.includes(searchQuery);
+}
+
 function render(){
   entriesEl.className = viewMode === 'grid' ? 'view-grid' : '';
-  const filtered = DATA.filter(d => activeCat === 'all' || d.cat === activeCat);
+  const filtered = DATA.filter(d => (activeCat === 'all' || d.cat === activeCat) && matchesSearch(d));
   entriesEl.innerHTML = '';
   emptyEl.style.display = filtered.length ? 'none' : 'block';
 
@@ -672,6 +691,11 @@ document.getElementById('aboutToggle').addEventListener('click', () => {
   const el = document.getElementById('aboutText');
   el.hidden = !el.hidden;
   document.getElementById('aboutToggle').setAttribute('aria-expanded', String(!el.hidden));
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchQuery = e.target.value.trim().toLowerCase();
+  render();
 });
 
 document.getElementById('filters').addEventListener('click', (e) => {
