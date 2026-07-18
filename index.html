@@ -135,8 +135,6 @@
   #entries.view-grid .entry-art{
     width:100%;aspect-ratio:1/1;height:auto;border-radius:5px;font-size:38px;margin-bottom:8px;
   }
-  /* Film & books aren't cropped in the grid — shown whole, centered on a glow sampled from the image */
-  #entries.view-grid .entry-art.fit img{width:100%;height:100%;object-fit:contain;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
@@ -172,8 +170,14 @@
     background:repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 10px);
   }
   /* Film & books keep their real proportions instead of a forced square crop — same square tile
-     as everyone else, with the sampled-color glow filling the space around the uncropped image */
-  .entry-art.fit img{object-fit:contain;}
+     as everyone else. The gap around the uncropped cover is filled with a blurred, oversized copy
+     of the same image (not a flat sampled color), so it reads as a soft version of the artwork
+     itself instead of a mismatched color block. */
+  .entry-art.fit .art-blur-bg{
+    position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;
+    filter:blur(20px) saturate(1.15) brightness(0.92);z-index:0;
+  }
+  .entry-art.fit .art-fg{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;}
   .entry-num{font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);padding-top:4px;}
   .entry-main h2{font-family:'Fraunces', serif;font-weight:500;font-size:22px;margin:0 0 4px;}
   .entry-sub{
@@ -514,29 +518,6 @@ function fmtDate(ts){
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString('en-US',{month:'short', year:'numeric'});
 }
-// Grid tiles for film/books show the whole poster (not cropped), so this samples the
-// image's average color and paints a matching radial glow behind it to fill the gaps.
-function applyPosterGlow(img, container){
-  const paint = () => {
-    try{
-      const size = 24;
-      const canvas = document.createElement('canvas');
-      canvas.width = size; canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, size, size);
-      const data = ctx.getImageData(0, 0, size, size).data;
-      let r = 0, g = 0, b = 0, n = 0;
-      for(let i = 0; i < data.length; i += 4){ r += data[i]; g += data[i+1]; b += data[i+2]; n++; }
-      r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
-      // Fades to fully transparent so the tile's own background shows through at the
-      // edges instead of a hard-edged, contrasting color block.
-      container.style.background =
-        `radial-gradient(circle, rgba(${r},${g},${b},0.9) 0%, rgba(${r},${g},${b},0.55) 50%, rgba(${r},${g},${b},0) 85%)`;
-    }catch(err){ /* leave the placeholder background if sampling fails */ }
-  };
-  if(img.complete) paint();
-  else img.addEventListener('load', paint, { once:true });
-}
 function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
   const square = d.cat === 'restaurants';
@@ -622,11 +603,11 @@ function render(){
     const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
     const useFit = d.coverPhoto && FIT_CATS.has(d.cat);
     const artInner = d.coverPhoto
-      ? `<img src="${d.coverPhoto}" alt="${d.title}">`
+      ? (useFit
+          ? `<img class="art-blur-bg" src="${d.coverPhoto}" alt="" aria-hidden="true"><img class="art-fg" src="${d.coverPhoto}" alt="${d.title}">`
+          : `<img src="${d.coverPhoto}" alt="${d.title}">`)
       : monogram(d.title || '??');
-    const artStyle = useFit
-      ? `style="background:#F5F3EC;"`
-      : (d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`);
+    const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
     const artClass = 'entry-art' + (useFit ? ' fit' : '') + (d.coverPhoto ? '' : ' no-photo');
     const byLine = d.by ? `<div class="entry-by">${d.by}</div>` : '';
     const entry = document.createElement('div');
@@ -651,11 +632,6 @@ function render(){
       location.hash = 'entry/' + encodeURIComponent(d.id);
     });
     entriesEl.appendChild(entry);
-    if(useFit){
-      const artEl = entry.querySelector('.entry-art');
-      const imgEl = artEl.querySelector('img');
-      if(imgEl) applyPosterGlow(imgEl, artEl);
-    }
   });
 }
 
