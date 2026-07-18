@@ -372,10 +372,44 @@
     color:var(--ink);opacity:0.09;white-space:nowrap;
     pointer-events:none;z-index:-1;
   }
+  .deco-hairline{
+    display:none;
+    position:fixed;left:34px;top:70px;bottom:70px;width:5px;
+    background:
+      linear-gradient(var(--accent), var(--accent)) no-repeat left/1px 100%,
+      linear-gradient(var(--accent), var(--accent)) no-repeat right/1px 100%;
+    opacity:0.4;
+    pointer-events:none;z-index:-1;
+  }
+  .deco-year{
+    display:none;
+    position:fixed;left:22px;top:26px;
+    font-family:'Fraunces', serif;font-style:italic;font-weight:500;font-size:13px;letter-spacing:0.06em;
+    color:var(--muted);opacity:0.4;
+    pointer-events:none;z-index:-1;
+  }
+  .deco-crop-top{
+    display:none;
+    position:fixed;top:20px;right:20px;width:14px;height:14px;
+    border-top:1px solid var(--accent);border-right:1px solid var(--accent);
+    opacity:0.4;
+    pointer-events:none;z-index:-1;
+  }
+  .deco-crop-bottom{
+    display:none;
+    position:fixed;bottom:20px;right:20px;width:14px;height:14px;
+    border-bottom:1px solid var(--accent);border-right:1px solid var(--accent);
+    opacity:0.4;
+    pointer-events:none;z-index:-1;
+  }
   @media (min-width:1300px){
     .deco-spine{display:block;}
     .deco-ruler{display:block;}
     .deco-watermark{display:block;}
+    .deco-hairline{display:block;}
+    .deco-year{display:block;}
+    .deco-crop-top{display:block;}
+    .deco-crop-bottom{display:block;}
   }
 </style>
 </head>
@@ -383,6 +417,10 @@
 <div class="deco-spine" aria-hidden="true">Commonplace &middot; Vol. I &middot; Est. MMXXVI &middot; Commonplace &middot; Vol. I &middot; Est. MMXXVI</div>
 <div class="deco-ruler" aria-hidden="true"></div>
 <div class="deco-watermark" aria-hidden="true">C</div>
+<div class="deco-hairline" aria-hidden="true"></div>
+<div class="deco-year" id="decoYear" aria-hidden="true"></div>
+<div class="deco-crop-top" aria-hidden="true"></div>
+<div class="deco-crop-bottom" aria-hidden="true"></div>
 <div class="wrap">
 
   <div class="masthead">
@@ -949,6 +987,7 @@ editEntryForm.addEventListener('submit', async (e) => {
   }
 });
 
+document.getElementById('decoYear').textContent = toRoman(new Date().getFullYear());
 loadEntries();
 </script>
 </body>
