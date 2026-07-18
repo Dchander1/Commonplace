@@ -412,6 +412,14 @@
     opacity:0.4;
     pointer-events:none;z-index:-1;
   }
+  .margin-entry-count{
+    display:none;
+    position:fixed;left:78px;top:50%;transform:translateY(-50%);
+    writing-mode:vertical-rl;
+    font-family:'Fraunces', serif;font-weight:600;font-size:56px;letter-spacing:0.04em;
+    color:var(--accent);opacity:0.3;
+    user-select:none;pointer-events:none;z-index:-1;line-height:1;
+  }
   @media (min-width:1300px){
     .deco-spine{display:block;}
     .deco-ruler{display:block;}
@@ -420,6 +428,7 @@
     .deco-year{display:block;}
     .deco-crop-top{display:block;}
     .deco-crop-bottom{display:block;}
+    .margin-entry-count{display:block;}
   }
 </style>
 </head>
@@ -431,6 +440,7 @@
 <div class="deco-year" id="decoYear" aria-hidden="true"></div>
 <div class="deco-crop-top" aria-hidden="true"></div>
 <div class="deco-crop-bottom" aria-hidden="true"></div>
+<div class="margin-entry-count" id="marginEntryCount" aria-hidden="true">XII</div>
 <div class="wrap">
 
   <div class="masthead">
@@ -666,6 +676,7 @@ async function loadEntries(){
   DATA = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   loadingEl.style.display = 'none';
   mastheadMeta.innerHTML = `Vol. I &mdash; Entry ${toRoman(DATA.length)}<br>Est. MMXXVI`;
+  document.getElementById('marginEntryCount').textContent = toRoman(DATA.length);
   render();
   route();
 }
