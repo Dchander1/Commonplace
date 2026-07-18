@@ -414,9 +414,9 @@
   }
   .margin-entry-count{
     display:none;
-    position:fixed;left:78px;bottom:80px;
+    position:fixed;left:-4vw;bottom:80px;
     writing-mode:vertical-rl;
-    font-family:'Fraunces', serif;font-weight:600;font-size:100px;letter-spacing:0.04em;
+    font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);letter-spacing:0.04em;
     color:var(--accent);opacity:0.3;
     user-select:none;pointer-events:none;z-index:-1;line-height:1;
   }
@@ -651,6 +651,17 @@ function toRoman(num){
   }
   return result;
 }
+// Keeps the vertical numeral's total stacked height roughly matching the C watermark's height
+// (min(42vw, 560px)) no matter how many characters the current Roman numeral has.
+function sizeMarginEntryCount(){
+  const el = document.getElementById('marginEntryCount');
+  const targetHeight = Math.min(window.innerWidth * 0.42, 560);
+  const len = (el.textContent || '').trim().length || 1;
+  el.style.fontSize = (targetHeight / len) + 'px';
+}
+window.addEventListener('resize', sizeMarginEntryCount);
+sizeMarginEntryCount();
+
 function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
   const foodRatio = d.cat === 'restaurants';
@@ -677,6 +688,7 @@ async function loadEntries(){
   loadingEl.style.display = 'none';
   mastheadMeta.innerHTML = `Vol. I &mdash; Entry ${toRoman(DATA.length)}<br>Est. MMXXVI`;
   document.getElementById('marginEntryCount').textContent = toRoman(DATA.length);
+  sizeMarginEntryCount();
   render();
   route();
 }
