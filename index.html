@@ -18,7 +18,7 @@
     --muted:#8A857A;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
+  html,body{margin:0;padding:0;overflow-x:hidden;}
   body{
     background:var(--paper);
     color:var(--ink);
@@ -341,9 +341,43 @@
   }
 
   :focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;}
+
+  /* Purely decorative margin elements — hidden below 1300px, never interactive, always behind content */
+  .deco-spine{
+    display:none;
+    position:fixed;left:22px;top:50%;transform:translateY(-50%);
+    writing-mode:vertical-rl;
+    font-family:'IBM Plex Mono', monospace;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
+    color:var(--muted);opacity:0.45;
+    pointer-events:none;z-index:-1;
+  }
+  .deco-ruler{
+    display:none;
+    position:fixed;left:6px;top:70px;bottom:70px;width:10px;
+    background:
+      linear-gradient(var(--rule), var(--rule)) no-repeat left/1px 100%,
+      repeating-linear-gradient(to bottom, var(--rule) 0, var(--rule) 1px, transparent 1px, transparent 36px);
+    opacity:0.35;
+    pointer-events:none;z-index:-1;
+  }
+  .deco-watermark{
+    display:none;
+    position:fixed;right:-4vw;top:50%;transform:translateY(-50%);
+    font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);line-height:1;
+    color:var(--ink);opacity:0.035;white-space:nowrap;
+    pointer-events:none;z-index:-1;
+  }
+  @media (min-width:1300px){
+    .deco-spine{display:block;}
+    .deco-ruler{display:block;}
+    .deco-watermark{display:block;}
+  }
 </style>
 </head>
 <body>
+<div class="deco-spine" aria-hidden="true">Commonplace &middot; Vol. 1 &middot; Est. 2026 &middot; Commonplace &middot; Vol. 1 &middot; Est. 2026</div>
+<div class="deco-ruler" aria-hidden="true"></div>
+<div class="deco-watermark" aria-hidden="true">C</div>
 <div class="wrap">
 
   <div class="masthead">
