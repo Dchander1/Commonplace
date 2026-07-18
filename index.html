@@ -156,6 +156,11 @@
   /* Food stays locked to this 4:5 ratio (cropped if needed) regardless of the uploaded photo's own shape */
   #entries.view-grid .entry-art.food-ratio{aspect-ratio:4/5;}
   #entries.view-grid .entry-art.food-ratio img{height:100%;object-fit:cover;}
+  /* Resets list view's fit-content/max-width/centering so film & book covers span the full tile
+     width in the grid too — otherwise the image sits narrower and centered, and the corner stamp
+     (positioned off the tile, not the image) ends up offset from the image's real edge */
+  #entries.view-grid .entry-art.fit{width:100%;max-width:none;justify-self:stretch;}
+  #entries.view-grid .entry-art.fit img{width:100%;max-width:100%;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
@@ -348,7 +353,7 @@
     position:fixed;left:22px;top:50%;transform:translateY(-50%);
     writing-mode:vertical-rl;
     font-family:'IBM Plex Mono', monospace;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
-    color:var(--muted);opacity:0.45;
+    color:var(--muted);opacity:0.65;
     pointer-events:none;z-index:-1;
   }
   .deco-ruler{
@@ -357,14 +362,14 @@
     background:
       linear-gradient(var(--rule), var(--rule)) no-repeat left/1px 100%,
       repeating-linear-gradient(to bottom, var(--rule) 0, var(--rule) 1px, transparent 1px, transparent 36px);
-    opacity:0.35;
+    opacity:0.55;
     pointer-events:none;z-index:-1;
   }
   .deco-watermark{
     display:none;
     position:fixed;right:-4vw;top:50%;transform:translateY(-50%);
     font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);line-height:1;
-    color:var(--ink);opacity:0.035;white-space:nowrap;
+    color:var(--ink);opacity:0.06;white-space:nowrap;
     pointer-events:none;z-index:-1;
   }
   @media (min-width:1300px){
