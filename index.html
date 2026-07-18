@@ -540,12 +540,12 @@
 <div class="auth-corner">
   <button class="auth-toggle" id="authToggle">Sign in</button>
   <div class="auth-panel" id="authPanel">
-    <div id="authLoggedOut">
-      <input type="email" id="authEmail" placeholder="Email">
-      <input type="password" id="authPassword" placeholder="Password">
-      <button id="authSignIn">Sign in</button>
+    <form id="authLoggedOut" autocomplete="off">
+      <input type="email" id="authEmail" placeholder="Email" autocomplete="off">
+      <input type="password" id="authPassword" placeholder="Password" autocomplete="off">
+      <button type="button" id="authSignIn">Sign in</button>
       <div class="auth-error" id="authError"></div>
-    </div>
+    </form>
     <div id="authLoggedIn" style="display:none;">
       <div class="signed-in-badge">Signed in</div>
       <button id="authSignOut">Sign out</button>
