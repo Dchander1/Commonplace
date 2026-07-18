@@ -414,11 +414,11 @@
   }
   .margin-entry-count{
     display:none;
-    position:fixed;left:-4vw;bottom:80px;
+    position:fixed;left:-0.3em;bottom:80px;
     writing-mode:vertical-rl;
-    font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);letter-spacing:0.04em;
+    font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);letter-spacing:-0.06em;
     color:var(--accent);opacity:0.3;
-    user-select:none;pointer-events:none;z-index:-1;line-height:1;
+    user-select:none;pointer-events:none;z-index:-1;line-height:0.86;
   }
   @media (min-width:1300px){
     .deco-spine{display:block;}
@@ -652,12 +652,17 @@ function toRoman(num){
   return result;
 }
 // Keeps the vertical numeral's total stacked height roughly matching the C watermark's height
-// (min(42vw, 560px)) no matter how many characters the current Roman numeral has.
+// (min(42vw, 560px)) no matter how many characters the current Roman numeral has. Divides by
+// this element's own line-height (0.86) so the math matches its actual per-character box height,
+// and applies a boost since a stack of separate glyphs reads visually smaller/sparser than one
+// solid letter at the same bounding-box height.
+const ENTRY_COUNT_LINE_HEIGHT = 0.86;
+const ENTRY_COUNT_BOOST = 1.25;
 function sizeMarginEntryCount(){
   const el = document.getElementById('marginEntryCount');
-  const targetHeight = Math.min(window.innerWidth * 0.42, 560);
+  const targetHeight = Math.min(window.innerWidth * 0.42, 560) * ENTRY_COUNT_BOOST;
   const len = (el.textContent || '').trim().length || 1;
-  el.style.fontSize = (targetHeight / len) + 'px';
+  el.style.fontSize = (targetHeight / (len * ENTRY_COUNT_LINE_HEIGHT)) + 'px';
 }
 window.addEventListener('resize', sizeMarginEntryCount);
 sizeMarginEntryCount();
