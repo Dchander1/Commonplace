@@ -130,6 +130,8 @@
   #entries.view-grid .entry-art{
     width:100%;aspect-ratio:1/1;height:auto;border-radius:5px;font-size:38px;margin-bottom:8px;
   }
+  #entries.view-grid .entry-art.fit{width:100%;max-width:none;aspect-ratio:auto;height:auto;justify-self:stretch;}
+  #entries.view-grid .entry-art.fit img{width:100%;height:auto;max-width:100%;object-fit:contain;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
@@ -157,10 +159,14 @@
     width:96px;height:96px;border-radius:4px;display:flex;align-items:center;justify-content:center;
     font-family:'Fraunces', serif;font-weight:600;font-size:30px;color:#fff;flex-shrink:0;overflow:hidden;position:relative;
   }
+  .entry-art img{width:100%;height:100%;object-fit:cover;display:block;}
   .entry-art::after{
     content:"";position:absolute;inset:0;
     background:repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 10px);
   }
+  /* Film & books keep the uploaded photo's real proportions instead of a forced square crop */
+  .entry-art.fit{justify-self:start;width:fit-content;max-width:180px;}
+  .entry-art.fit img{width:auto;max-width:180px;object-fit:contain;}
   .entry-num{font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);padding-top:4px;}
   .entry-main h2{font-family:'Fraunces', serif;font-weight:500;font-size:22px;margin:0 0 4px;}
   .entry-sub{
@@ -266,6 +272,9 @@
     font-family:'Fraunces', serif;font-weight:600;font-size:64px;color:#fff;
   }
   .article-hero img{width:100%;height:100%;object-fit:cover;}
+  /* Film & books show the uploaded photo at its real proportions, not cropped to 16:9 */
+  .article-hero.fit{aspect-ratio:auto;width:fit-content;max-width:100%;height:auto;max-height:70vh;}
+  .article-hero.fit img{width:auto;height:auto;max-width:100%;max-height:70vh;object-fit:contain;display:block;}
   .article-sub{
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
     color:var(--accent-2);margin-bottom:8px;
@@ -294,6 +303,8 @@
     .masthead-meta{text-align:left;}
     .entry-row{grid-template-columns:64px 20px 1fr;}
     .entry-art{width:64px;height:64px;font-size:20px;}
+    .entry-art.fit{max-width:110px;}
+    .entry-art.fit img{max-width:110px;}
     .entry-date{display:none;}
     .stamp{grid-column:2 / -1;margin-top:8px;justify-self:start;}
   }
@@ -473,6 +484,8 @@ function compressImage(file, maxWidth, quality){
 }
 
 const CAT_LABELS = { film:'Film', music:'Music', books:'Books', restaurants:'Restaurants', misc:'Misc' };
+// Movie posters and book covers keep their real proportions instead of a forced square/16:9 crop
+const FIT_CATS = new Set(['film', 'books']);
 
 const PALETTES = [
   ['#8C4A2F','#B5562F'], ['#4A5A3E','#5C6B4F'], ['#8C6A22','#C08A2E'],
@@ -493,8 +506,8 @@ function fmtDate(ts){
 function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
   return d.coverPhoto
-    ? { style:'', inner:`<img src="${d.coverPhoto}" alt="${d.title}">` }
-    : { style:`background:linear-gradient(135deg, ${c1}, ${c2});`, inner: monogram(d.title || '??') };
+    ? { style:'', inner:`<img src="${d.coverPhoto}" alt="${d.title}">`, fit: FIT_CATS.has(d.cat) }
+    : { style:`background:linear-gradient(135deg, ${c1}, ${c2});`, inner: monogram(d.title || '??'), fit: false };
 }
 let DATA = [];
 let activeCat = 'all';
@@ -524,6 +537,7 @@ const editEntryForm = document.getElementById('editEntryForm');
 function showArticle(entry){
   const hero = heroArt(entry);
   const heroEl = document.getElementById('articleHero');
+  heroEl.className = 'article-hero' + (hero.fit ? ' fit' : '');
   heroEl.setAttribute('style', hero.style);
   heroEl.innerHTML = hero.inner;
   document.getElementById('articleSub').textContent = `${CAT_LABELS[entry.cat] || entry.cat} · ${entry.by || ''}`;
@@ -571,16 +585,18 @@ function render(){
 
   filtered.forEach(d => {
     const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
+    const useFit = d.coverPhoto && FIT_CATS.has(d.cat);
     const artInner = d.coverPhoto
-      ? `<img src="${d.coverPhoto}" alt="${d.title}" style="width:100%;height:100%;object-fit:cover;">`
+      ? `<img src="${d.coverPhoto}" alt="${d.title}">`
       : monogram(d.title || '??');
     const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
+    const artClass = 'entry-art' + (useFit ? ' fit' : '');
     const entry = document.createElement('div');
     entry.className = 'entry';
     entry.dataset.id = d.id;
     entry.innerHTML = `
       <div class="entry-row">
-        <div class="entry-art" ${artStyle}>${artInner}</div>
+        <div class="${artClass}" ${artStyle}>${artInner}</div>
         <div class="entry-num"></div>
         <div class="entry-main">
           <div class="entry-sub">${CAT_LABELS[d.cat] || d.cat} &middot; ${d.by || ''}</div>
