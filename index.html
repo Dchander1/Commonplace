@@ -266,15 +266,18 @@
     background:none;border:none;color:var(--accent-2);cursor:pointer;padding:0;margin-bottom:26px;
   }
   .back-link:hover{text-decoration:underline;}
+  /* Hero floats left so title/verdict/note wrap beside it, then drop to a full-width
+     line once they've written past the image's height. #articleView::after clears it. */
   .article-hero{
-    width:100%;aspect-ratio:16/9;border-radius:6px;overflow:hidden;margin-bottom:22px;
-    display:flex;align-items:center;justify-content:center;position:relative;
+    float:left;width:320px;max-width:50%;aspect-ratio:16/9;border-radius:6px;overflow:hidden;
+    margin:0 28px 20px 0;display:flex;align-items:center;justify-content:center;position:relative;
     font-family:'Fraunces', serif;font-weight:600;font-size:64px;color:#fff;
   }
   .article-hero img{width:100%;height:100%;object-fit:cover;}
   /* Film & books show the uploaded photo at its real proportions, not cropped to 16:9 */
-  .article-hero.fit{aspect-ratio:auto;width:fit-content;max-width:100%;height:auto;max-height:70vh;}
+  .article-hero.fit{aspect-ratio:auto;width:fit-content;max-width:48%;height:auto;max-height:70vh;}
   .article-hero.fit img{width:auto;height:auto;max-width:100%;max-height:70vh;object-fit:contain;display:block;}
+  #articleView::after{content:"";display:table;clear:both;}
   .article-sub{
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
     color:var(--accent-2);margin-bottom:8px;
@@ -284,7 +287,7 @@
   .article-meta-row{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
   .article-date{font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);}
   .article-note{font-size:17px;line-height:1.75;color:#2a2822;max-width:66ch;margin-bottom:26px;white-space:pre-wrap;}
-  .article-admin{display:none;align-items:center;gap:16px;margin-bottom:30px;padding-top:18px;border-top:1px dashed var(--rule);}
+  .article-admin{display:none;clear:both;align-items:center;gap:16px;margin-bottom:30px;padding-top:18px;border-top:1px dashed var(--rule);}
   body.is-admin .article-admin{display:flex;}
   .article-admin .delete-btn{margin-top:0;}
   .edit-toggle{
@@ -306,6 +309,7 @@
     .entry-art.fit{max-width:110px;}
     .entry-art.fit img{max-width:110px;}
     .entry-date{display:none;}
+    .article-hero, .article-hero.fit{float:none;width:100%;max-width:100%;}
     .stamp{grid-column:2 / -1;margin-top:8px;justify-self:start;}
   }
 
