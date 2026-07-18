@@ -495,8 +495,12 @@ function compressImage(file, maxWidth, quality){
 }
 
 const CAT_LABELS = { film:'Film', music:'Music', books:'Books', restaurants:'Food', misc:'Misc' };
-// Movie posters and book covers keep their real proportions instead of a forced square/16:9 crop
+// Movie posters and book covers keep their real proportions instead of a forced square/16:9
+// crop in the list/grid tiles.
 const FIT_CATS = new Set(['film', 'books']);
+// The article hero also skips the crop for music — album art is usually near-square, so
+// forcing it into a 16:9 hero crops it for no reason; natural proportions read better.
+const HERO_FIT_CATS = new Set(['film', 'books', 'music']);
 
 const PALETTES = [
   ['#8C4A2F','#B5562F'], ['#4A5A3E','#5C6B4F'], ['#8C6A22','#C08A2E'],
@@ -541,7 +545,7 @@ function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
   const square = d.cat === 'restaurants';
   return d.coverPhoto
-    ? { style:'', inner:`<img src="${d.coverPhoto}" alt="${d.title}">`, fit: FIT_CATS.has(d.cat), square }
+    ? { style:'', inner:`<img src="${d.coverPhoto}" alt="${d.title}">`, fit: HERO_FIT_CATS.has(d.cat), square }
     : { style:`background:linear-gradient(135deg, ${c1}, ${c2});`, inner: monogram(d.title || '??'), fit: false, square };
 }
 let DATA = [];
