@@ -96,10 +96,11 @@
      identical font-size and padding) so all three toolbar pieces line up at the same height */
   .search-bar{border:1px solid var(--ink);width:220px;flex:0 0 auto;}
   .search-bar input{
-    display:block;width:100%;
+    display:block;width:100%;-webkit-appearance:none;appearance:none;
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.04em;
     padding:9px 14px;border:none;background:#fff;color:var(--ink);
   }
+  .search-bar input::-webkit-search-cancel-button{-webkit-appearance:none;}
   .search-bar input::placeholder{color:var(--muted);}
   .search-bar input:focus{outline:none;background:var(--paper-2);}
 
@@ -475,7 +476,7 @@
       <button class="filter-btn" data-cat="misc">Misc</button>
     </div>
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search titles, people, notes&hellip;">
+      <input type="search" id="searchInput" name="q" autocomplete="off" placeholder="Search titles, people, notes&hellip;">
     </div>
     <div class="view-toggle" id="viewToggle">
       <button class="view-btn" data-view="list">List</button>
