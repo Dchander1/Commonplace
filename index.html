@@ -135,11 +135,14 @@
   #entries.view-grid .entry-art{
     width:100%;aspect-ratio:1/1;height:auto;border-radius:5px;font-size:38px;margin-bottom:8px;
   }
+  /* Film & books aren't cropped in the grid — shown whole, centered on a glow sampled from the image */
+  #entries.view-grid .entry-art.fit img{width:100%;height:100%;object-fit:contain;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
   #entries.view-grid .entry-verdict-line{display:none;}
-  #entries.view-grid .entry-main h2{font-size:15px;line-height:1.25;margin:0;}
+  #entries.view-grid .entry-main h2{font-size:18px;line-height:1.3;margin:0;}
+  #entries.view-grid .entry-by{display:block;}
   #entries.view-grid .stamp{
     position:absolute;top:8px;right:8px;margin-top:0;font-size:8.5px;padding:3px 7px;
     background:rgba(28,27,25,0.62);border-color:rgba(255,255,255,0.7);color:#fff;backdrop-filter:blur(2px);
@@ -176,6 +179,8 @@
     font-family:'IBM Plex Mono', monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
     color:var(--accent-2);margin-bottom:6px;
   }
+  /* Grid-only: lighter "by" caption under the title (list view already shows this via .entry-sub) */
+  .entry-by{display:none;font-family:'Source Serif 4', serif;font-size:13px;color:var(--muted);margin-top:3px;}
   .entry-verdict-line{font-size:14.5px;color:#4a473f;max-width:52ch;margin-bottom:8px;}
   .entry-date{font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);padding-top:6px;white-space:nowrap;}
 
@@ -504,6 +509,28 @@ function fmtDate(ts){
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString('en-US',{month:'short', year:'numeric'});
 }
+// Grid tiles for film/books show the whole poster (not cropped), so this samples the
+// image's average color and paints a matching radial glow behind it to fill the gaps.
+function applyPosterGlow(img, container){
+  const paint = () => {
+    try{
+      const size = 24;
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, size, size);
+      const data = ctx.getImageData(0, 0, size, size).data;
+      let r = 0, g = 0, b = 0, n = 0;
+      for(let i = 0; i < data.length; i += 4){ r += data[i]; g += data[i+1]; b += data[i+2]; n++; }
+      r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
+      const light = `rgb(${Math.min(255, Math.round(r*1.2))},${Math.min(255, Math.round(g*1.2))},${Math.min(255, Math.round(b*1.2))})`;
+      const dark = `rgb(${Math.round(r*0.5)},${Math.round(g*0.5)},${Math.round(b*0.5)})`;
+      container.style.background = `radial-gradient(circle, ${light} 0%, rgb(${r},${g},${b}) 55%, ${dark} 100%)`;
+    }catch(err){ /* leave the placeholder background if sampling fails */ }
+  };
+  if(img.complete) paint();
+  else img.addEventListener('load', paint, { once:true });
+}
 function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
   return d.coverPhoto
@@ -590,8 +617,11 @@ function render(){
     const artInner = d.coverPhoto
       ? `<img src="${d.coverPhoto}" alt="${d.title}">`
       : monogram(d.title || '??');
-    const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
+    const artStyle = useFit
+      ? `style="background:var(--paper-2);"`
+      : (d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`);
     const artClass = 'entry-art' + (useFit ? ' fit' : '');
+    const byLine = d.by ? `<div class="entry-by">${d.by}</div>` : '';
     const entry = document.createElement('div');
     entry.className = 'entry';
     entry.dataset.id = d.id;
@@ -602,6 +632,7 @@ function render(){
         <div class="entry-main">
           <div class="entry-sub">${CAT_LABELS[d.cat] || d.cat} &middot; ${d.by || ''}</div>
           <h2>${d.title}</h2>
+          ${byLine}
           <div class="entry-verdict-line">${d.verdict || ''}</div>
         </div>
         <div class="stamp" contenteditable="${isAdmin}" spellcheck="false" data-id="${d.id}">${d.stamp || 'Worth It'}</div>
@@ -613,6 +644,11 @@ function render(){
       location.hash = 'entry/' + encodeURIComponent(d.id);
     });
     entriesEl.appendChild(entry);
+    if(useFit){
+      const artEl = entry.querySelector('.entry-art');
+      const imgEl = artEl.querySelector('img');
+      if(imgEl) applyPosterGlow(imgEl, artEl);
+    }
   });
 }
 
