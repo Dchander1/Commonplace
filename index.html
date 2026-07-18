@@ -26,7 +26,7 @@
     -webkit-font-smoothing:antialiased;
     line-height:1.5;
   }
-  .wrap{max-width:860px;margin:0 auto;padding:56px 24px 120px;}
+  .wrap{max-width:1180px;margin:0 auto;padding:56px 24px 120px;}
 
   .masthead{
     display:flex;
@@ -36,6 +36,7 @@
     padding-bottom:18px;
     margin-bottom:8px;
   }
+  .masthead-title{display:flex;align-items:center;flex-wrap:wrap;gap:18px;}
   .masthead h1{
     font-family:'Fraunces', serif;
     font-weight:600;
@@ -43,6 +44,19 @@
     letter-spacing:-0.01em;
     margin:0;
   }
+  .about-toggle{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent-2);
+    cursor:pointer;
+    background:transparent;
+    border:1px solid var(--accent-2);
+    border-radius:999px;
+    padding:7px 14px;
+  }
+  .about-toggle:hover{background:var(--paper-2);}
   .masthead-meta{
     text-align:right;
     font-family:'IBM Plex Mono', monospace;
@@ -60,28 +74,12 @@
     margin:10px 0 28px;
   }
 
-  .about{margin:0 0 28px;}
-  .about summary{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:10.5px;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:var(--accent-2);
-    cursor:pointer;
-    list-style:none;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-  }
-  .about summary::-webkit-details-marker{display:none;}
-  .about summary::before{content:"+";font-size:13px;line-height:1;}
-  .about[open] summary::before{content:"\2212";}
   .about-text{
     font-family:'Source Serif 4', serif;
     font-size:14.5px;
     color:#4a473f;
     max-width:58ch;
-    margin:10px 0 0;
+    margin:0 0 28px;
     padding:12px 14px;
     background:var(--paper-2);
     border-left:2px solid var(--accent-2);
@@ -190,11 +188,6 @@
     letter-spacing:0.06em;padding:40px 0;text-align:center;display:none;
   }
 
-  footer{
-    margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);
-    font-family:'IBM Plex Mono', monospace;font-size:10.5px;color:var(--muted);letter-spacing:0.04em;
-  }
-
   /* Auth corner + admin UI */
   .auth-corner{
     position:fixed;bottom:18px;right:18px;
@@ -283,10 +276,10 @@
     color:var(--accent-2);margin-bottom:8px;
   }
   .article-title{font-family:'Fraunces', serif;font-weight:600;font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 12px;}
-  .article-verdict{font-size:17px;color:#4a473f;max-width:64ch;margin-bottom:18px;}
+  .article-verdict{font-size:17px;color:#4a473f;margin-bottom:18px;}
   .article-meta-row{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
   .article-date{font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);}
-  .article-note{font-size:17px;line-height:1.75;color:#2a2822;max-width:66ch;margin-bottom:26px;white-space:pre-wrap;}
+  .article-note{font-size:17px;line-height:1.75;color:#2a2822;margin-bottom:26px;white-space:pre-wrap;}
   .article-admin{display:none;clear:both;align-items:center;gap:16px;margin-bottom:30px;padding-top:18px;border-top:1px dashed var(--rule);}
   body.is-admin .article-admin{display:flex;}
   .article-admin .delete-btn{margin-top:0;}
@@ -320,15 +313,15 @@
 <div class="wrap">
 
   <div class="masthead">
-    <h1>Commonplace</h1>
+    <div class="masthead-title">
+      <h1>Commonplace</h1>
+      <button class="about-toggle" id="aboutToggle" aria-expanded="false">What is this?</button>
+    </div>
     <div class="masthead-meta" id="mastheadMeta">Vol. 1 &mdash; Entry &hellip;<br>Est. 2026</div>
   </div>
   <div class="tagline">a running log of what I watched, heard, read, and ate &mdash; and whether it was worth your time</div>
 
-  <details class="about">
-    <summary>What is this?</summary>
-    <p class="about-text">[Write your own paragraph here about what Commonplace is, why you started it, and what people should expect. This text is just a placeholder, swap it for your own words.]</p>
-  </details>
+  <p class="about-text" id="aboutText" hidden>[Write your own paragraph here about what Commonplace is, why you started it, and what people should expect. This text is just a placeholder, swap it for your own words.]</p>
 
   <div class="add-entry-bar" id="addEntryBar">
     <button class="add-entry-toggle" id="addEntryToggle">+ Log a new entry</button>
@@ -417,7 +410,6 @@
     </form>
   </div>
 
-  <footer>Click any entry to read the full article &middot; entries are numbered by filing order, not rank</footer>
 </div>
 
 <div class="auth-corner">
@@ -645,6 +637,12 @@ document.addEventListener('click', async (e) => {
   await deleteDoc(doc(db, 'entries', btn.dataset.id));
   location.hash = '';
   await loadEntries();
+});
+
+document.getElementById('aboutToggle').addEventListener('click', () => {
+  const el = document.getElementById('aboutText');
+  el.hidden = !el.hidden;
+  document.getElementById('aboutToggle').setAttribute('aria-expanded', String(!el.hidden));
 });
 
 document.getElementById('filters').addEventListener('click', (e) => {
