@@ -114,16 +114,20 @@
   }
   .view-btn.active{background:var(--ink);color:var(--paper);}
 
+  /* True masonry: each tile keeps its photo's real proportions (a movie poster and an album
+     cover end up different heights), packed into columns via CSS multi-column layout — no
+     square is forced on anyone, so there's no leftover space that needs to be filled/faked. */
   #entries.view-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
-    gap:20px;
+    column-width:230px;
+    column-gap:20px;
   }
   #entries.view-grid .entry{
     border:1px solid var(--rule);
     border-radius:8px;
     padding:10px;
     background:#F5F3EC;
+    margin-bottom:20px;
+    break-inside:avoid;
     transition:transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
   #entries.view-grid .entry:hover{
@@ -133,8 +137,11 @@
   }
   #entries.view-grid .entry-row{grid-template-columns:1fr;gap:0;position:relative;}
   #entries.view-grid .entry-art{
-    width:100%;aspect-ratio:1/1;height:auto;border-radius:5px;font-size:38px;margin-bottom:8px;
+    width:100%;height:auto;border-radius:5px;font-size:38px;margin-bottom:8px;
   }
+  /* No photo to take a natural ratio from, so the monogram fallback stays a plain square */
+  #entries.view-grid .entry-art.no-photo{aspect-ratio:1/1;}
+  #entries.view-grid .entry-art img{width:100%;height:auto;display:block;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
@@ -169,15 +176,10 @@
     content:"";position:absolute;inset:0;
     background:repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 10px);
   }
-  /* Film & books keep their real proportions instead of a forced square crop — same square tile
-     as everyone else. The gap around the uncropped cover is filled with a blurred, oversized copy
-     of the same image (not a flat sampled color), so it reads as a soft version of the artwork
-     itself instead of a mismatched color block. */
-  .entry-art.fit .art-blur-bg{
-    position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;
-    filter:blur(20px) saturate(1.15) brightness(0.92);z-index:0;
-  }
-  .entry-art.fit .art-fg{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;}
+  /* Film & books keep their real proportions in list view — shown at their natural width for
+     the row's fixed height, centered, instead of being cropped or squared off */
+  .entry-art.fit{justify-self:center;width:fit-content;max-width:230px;}
+  .entry-art.fit img{width:auto;max-width:230px;object-fit:contain;}
   .entry-num{font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);padding-top:4px;}
   .entry-main h2{font-family:'Fraunces', serif;font-weight:500;font-size:22px;margin:0 0 4px;}
   .entry-sub{
@@ -317,6 +319,8 @@
     .masthead-meta{text-align:left;}
     .entry-row{grid-template-columns:84px 20px 1fr;}
     .entry-art{width:84px;height:84px;font-size:24px;}
+    .entry-art.fit{max-width:150px;}
+    .entry-art.fit img{max-width:150px;}
     .entry-date{display:none;}
     .article-hero, .article-hero.fit{float:none;width:100%;max-width:100%;}
     .stamp{grid-column:2 / -1;margin-top:8px;justify-self:start;}
@@ -603,9 +607,7 @@ function render(){
     const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
     const useFit = d.coverPhoto && FIT_CATS.has(d.cat);
     const artInner = d.coverPhoto
-      ? (useFit
-          ? `<img class="art-blur-bg" src="${d.coverPhoto}" alt="" aria-hidden="true"><img class="art-fg" src="${d.coverPhoto}" alt="${d.title}">`
-          : `<img src="${d.coverPhoto}" alt="${d.title}">`)
+      ? `<img src="${d.coverPhoto}" alt="${d.title}">`
       : monogram(d.title || '??');
     const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
     const artClass = 'entry-art' + (useFit ? ' fit' : '') + (d.coverPhoto ? '' : ' no-photo');
