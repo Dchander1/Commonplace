@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commonplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EFEDE6;
+    --paper-2:#E6E2D6;
+    --ink:#1C1B19;
+    --accent:#A6763D;
+    --accent-2:#2F4A43;
+    --rule:#C9C3B4;
+    --muted:#8A857A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', Georgia, serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:56px 24px 120px;}
+
+  .masthead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:18px;
+    margin-bottom:8px;
+  }
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(40px, 7vw, 64px);
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .masthead-meta{
+    text-align:right;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+    line-height:1.6;
+  }
+  .tagline{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--muted);
+    margin:10px 0 28px;
+  }
+
+  .about{margin:0 0 28px;}
+  .about summary{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent-2);
+    cursor:pointer;
+    list-style:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .about summary::-webkit-details-marker{display:none;}
+  .about summary::before{content:"+";font-size:13px;line-height:1;}
+  .about[open] summary::before{content:"\2212";}
+  .about-text{
+    font-family:'Source Serif 4', serif;
+    font-size:14.5px;
+    color:#4a473f;
+    max-width:58ch;
+    margin:10px 0 0;
+    padding:12px 14px;
+    background:var(--paper-2);
+    border-left:2px solid var(--accent-2);
+  }
+
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .view-toggle{display:flex;border:1px solid var(--ink);width:fit-content;}
+  .view-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background:transparent;
+    border:none;
+    padding:9px 14px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .view-btn.active{background:var(--ink);color:var(--paper);}
+
+  #entries.view-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
+    gap:20px;
+  }
+  #entries.view-grid .entry{
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:10px;
+    background:#F5F3EC;
+    transition:transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  #entries.view-grid .entry:hover{
+    border-color:var(--accent-2);
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px rgba(28,27,25,0.14);
+  }
+  #entries.view-grid .entry-row{grid-template-columns:1fr;gap:0;position:relative;}
+  #entries.view-grid .entry-art{
+    width:100%;aspect-ratio:1/1;height:auto;border-radius:5px;font-size:38px;margin-bottom:8px;
+  }
+  #entries.view-grid .entry-num,
+  #entries.view-grid .entry-date,
+  #entries.view-grid .entry-sub,
+  #entries.view-grid .entry-verdict-line{display:none;}
+  #entries.view-grid .entry-main h2{font-size:15px;line-height:1.25;margin:0;}
+  #entries.view-grid .stamp{
+    position:absolute;top:8px;right:8px;margin-top:0;font-size:8.5px;padding:3px 7px;
+    background:rgba(28,27,25,0.62);border-color:rgba(255,255,255,0.7);color:#fff;backdrop-filter:blur(2px);
+  }
+  #entries.view-grid .stamp:focus{background:rgba(28,27,25,0.85);}
+  #entries.view-grid .entry-note-inner{padding-left:0;}
+
+  .filters{display:flex;gap:2px;margin-bottom:16px;border:1px solid var(--ink);width:fit-content;flex-wrap:wrap;}
+  .filter-btn{
+    font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
+    background:transparent;border:none;border-right:1px solid var(--ink);padding:9px 16px;cursor:pointer;color:var(--ink);
+  }
+  .filter-btn:last-child{border-right:none;}
+  .filter-btn.active{background:var(--ink);color:var(--paper);}
+  .filter-btn:hover:not(.active){background:var(--paper-2);}
+
+  .entry{border-bottom:1px solid var(--rule);padding:22px 0;cursor:pointer;}
+  .entry:first-of-type{border-top:1px solid var(--rule);}
+  .entry-row{display:grid;grid-template-columns:96px 30px 1fr auto auto;align-items:start;gap:16px;}
+  .entry-art{
+    width:96px;height:96px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces', serif;font-weight:600;font-size:30px;color:#fff;flex-shrink:0;overflow:hidden;position:relative;
+  }
+  .entry-art::after{
+    content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 10px);
+  }
+  .entry-num{font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);padding-top:4px;}
+  .entry-main h2{font-family:'Fraunces', serif;font-weight:500;font-size:22px;margin:0 0 4px;}
+  .entry-sub{
+    font-family:'IBM Plex Mono', monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--accent-2);margin-bottom:6px;
+  }
+  .entry-verdict-line{font-size:14.5px;color:#4a473f;max-width:52ch;margin-bottom:8px;}
+  .entry-date{font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);padding-top:6px;white-space:nowrap;}
+
+  .stamp{
+    font-family:'IBM Plex Mono', monospace;font-size:10px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;
+    border:2px solid var(--accent-2);color:var(--accent-2);padding:5px 10px;border-radius:2px;white-space:nowrap;
+    align-self:start;margin-top:2px;min-width:56px;text-align:center;cursor:text;outline:none;
+  }
+  .stamp:hover{border-style:dashed;}
+  .stamp:focus{border-style:solid;background:rgba(47,74,67,0.06);}
+  .stamp[contenteditable="false"]{cursor:default;opacity:0.9;}
+
+  .entry-note{max-height:0;overflow:hidden;transition:max-height 0.35s ease, margin-top 0.35s ease;}
+  .entry.open .entry-note{max-height:400px;margin-top:16px;}
+  .entry-note-inner{padding:16px 0 4px 112px;border-top:1px dashed var(--rule);font-size:15px;color:#3a372f;max-width:60ch;}
+  .entry-note-inner p{margin:0;}
+
+  .empty{
+    font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:0.06em;padding:40px 0;text-align:center;display:none;
+  }
+
+  footer{
+    margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);
+    font-family:'IBM Plex Mono', monospace;font-size:10.5px;color:var(--muted);letter-spacing:0.04em;
+  }
+
+  /* Auth corner + admin UI */
+  .auth-corner{
+    position:fixed;bottom:18px;right:18px;
+    font-family:'IBM Plex Mono', monospace;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;
+    z-index:50;
+  }
+  .auth-toggle{
+    background:var(--ink);color:var(--paper);border:none;padding:8px 14px;border-radius:999px;cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+  }
+  .auth-panel{
+    display:none;position:absolute;bottom:38px;right:0;background:var(--paper);border:1px solid var(--ink);
+    border-radius:8px;padding:16px;width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.16);
+  }
+  .auth-panel.open{display:block;}
+  .auth-panel input{
+    width:100%;font-family:'Source Serif 4', serif;font-size:13px;padding:7px 8px;margin-bottom:8px;
+    border:1px solid var(--rule);border-radius:4px;background:#fff;
+  }
+  .auth-panel button{
+    width:100%;font-family:'IBM Plex Mono', monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;
+    padding:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:4px;cursor:pointer;
+  }
+  .auth-status{font-size:10px;color:var(--muted);margin-top:8px;text-align:center;}
+  .auth-error{font-size:10px;color:#8A3324;margin-top:6px;}
+  .signed-in-badge{font-size:10px;color:var(--accent-2);margin-bottom:8px;text-align:center;}
+
+  .add-entry-bar{display:none;margin-bottom:20px;}
+  .add-entry-bar.visible{display:block;}
+  .add-entry-toggle{
+    font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
+    background:transparent;border:1px dashed var(--accent-2);color:var(--accent-2);padding:9px 16px;
+    cursor:pointer;width:100%;text-align:left;border-radius:4px;
+  }
+  .add-entry-form{
+    display:none;margin-top:10px;padding:16px;border:1px solid var(--rule);border-radius:6px;background:#F5F3EC;
+  }
+  .add-entry-form.open{display:grid;gap:8px;}
+  .add-entry-form input, .add-entry-form select, .add-entry-form textarea{
+    font-family:'Source Serif 4', serif;font-size:14px;padding:8px 10px;border:1px solid var(--rule);
+    border-radius:4px;background:#fff;width:100%;
+  }
+  .add-entry-form textarea{min-height:70px;resize:vertical;}
+  .add-entry-form button{
+    font-family:'IBM Plex Mono', monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;
+    background:var(--accent-2);color:var(--paper);border:none;padding:10px;border-radius:4px;cursor:pointer;width:fit-content;
+  }
+  .delete-btn{
+    display:none;font-family:'IBM Plex Mono', monospace;font-size:10px;color:#8A3324;background:none;border:none;
+    cursor:pointer;text-decoration:underline;padding:0;margin-top:8px;
+  }
+  body.is-admin .delete-btn{display:inline-block;}
+
+  .photo-strip{
+    display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:4px;
+  }
+  .photo-strip img{
+    width:110px;height:110px;object-fit:cover;border-radius:5px;flex-shrink:0;border:1px solid var(--rule);cursor:pointer;
+  }
+  .upload-status{font-family:'IBM Plex Mono', monospace;font-size:10.5px;color:var(--accent-2);margin-top:2px;}
+
+  .loading-msg{
+    font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);text-transform:uppercase;
+    letter-spacing:0.06em;padding:30px 0;text-align:center;
+  }
+
+  @media (max-width:560px){
+    .masthead{flex-direction:column;align-items:flex-start;gap:10px;}
+    .masthead-meta{text-align:left;}
+    .entry-row{grid-template-columns:64px 20px 1fr;}
+    .entry-art{width:64px;height:64px;font-size:20px;}
+    .entry-date{display:none;}
+    .stamp{grid-column:2 / -1;margin-top:8px;justify-self:start;}
+    .entry-note-inner{padding-left:0;}
+  }
+
+  :focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>Commonplace</h1>
+    <div class="masthead-meta" id="mastheadMeta">Vol. 1 &mdash; Entry &hellip;<br>Est. 2026</div>
+  </div>
+  <div class="tagline">a running log of what I watched, heard, read, and ate &mdash; and whether it was worth your time</div>
+
+  <details class="about">
+    <summary>What is this?</summary>
+    <p class="about-text">[Write your own paragraph here about what Commonplace is, why you started it, and what people should expect. This text is just a placeholder, swap it for your own words.]</p>
+  </details>
+
+  <div class="add-entry-bar" id="addEntryBar">
+    <button class="add-entry-toggle" id="addEntryToggle">+ Log a new entry</button>
+    <form class="add-entry-form" id="addEntryForm">
+      <select id="fCat">
+        <option value="film">Film</option>
+        <option value="music">Music</option>
+        <option value="books">Books</option>
+        <option value="restaurants">Restaurants</option>
+        <option value="misc">Misc</option>
+      </select>
+      <input type="text" id="fTitle" placeholder="Title" required>
+      <input type="text" id="fBy" placeholder="By / director / location">
+      <input type="text" id="fVerdict" placeholder="One-line verdict" required>
+      <textarea id="fNote" placeholder="The full note"></textarea>
+      <input type="text" id="fStamp" placeholder="Stamp label (e.g. Essential)" value="Worth It">
+      <label style="font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Cover photo (used as the tile image)</label>
+      <input type="file" id="fCoverPhoto" accept="image/*">
+      <div id="multiPhotoField" style="display:none;">
+        <label style="font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Additional photos</label>
+        <input type="file" id="fPhotos" accept="image/*" multiple>
+      </div>
+      <div class="upload-status" id="uploadStatus"></div>
+      <button type="submit" id="saveBtn">Save entry</button>
+    </form>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="film">Film</button>
+      <button class="filter-btn" data-cat="music">Music</button>
+      <button class="filter-btn" data-cat="books">Books</button>
+      <button class="filter-btn" data-cat="restaurants">Restaurants</button>
+      <button class="filter-btn" data-cat="misc">Misc</button>
+    </div>
+    <div class="view-toggle" id="viewToggle">
+      <button class="view-btn active" data-view="list">List</button>
+      <button class="view-btn" data-view="grid">Grid</button>
+    </div>
+  </div>
+
+  <div class="loading-msg" id="loadingMsg">Loading entries&hellip;</div>
+  <div id="entries"></div>
+  <div class="empty" id="empty">Nothing filed under this section yet</div>
+
+  <footer>Click any entry to read the full note &middot; entries are numbered by filing order, not rank</footer>
+</div>
+
+<div class="auth-corner">
+  <button class="auth-toggle" id="authToggle">Sign in</button>
+  <div class="auth-panel" id="authPanel">
+    <div id="authLoggedOut">
+      <input type="email" id="authEmail" placeholder="Email">
+      <input type="password" id="authPassword" placeholder="Password">
+      <button id="authSignIn">Sign in</button>
+      <div class="auth-error" id="authError"></div>
+    </div>
+    <div id="authLoggedIn" style="display:none;">
+      <div class="signed-in-badge">Signed in</div>
+      <button id="authSignOut">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB1trHYFyxMOTgxBofcdzsuxQA2aQEpP7c",
+  authDomain: "commonplace-5c588.firebaseapp.com",
+  projectId: "commonplace-5c588",
+  storageBucket: "commonplace-5c588.firebasestorage.app",
+  messagingSenderId: "348218892653",
+  appId: "1:348218892653:web:a97a4c25f15b4264a07a64"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const entriesCol = collection(db, "entries");
+
+const CAT_LABELS = { film:'Film', music:'Music', books:'Books', restaurants:'Restaurants', misc:'Misc' };
+
+const PALETTES = [
+  ['#8C4A2F','#B5562F'], ['#4A5A3E','#5C6B4F'], ['#8C6A22','#C08A2E'],
+  ['#3F5566','#5C7C8A'], ['#6B4A3E','#8C6A50'], ['#5A3E5C','#7C5C7E'],
+  ['#2F4A43','#456357'], ['#7A3E3E','#A65858']
+];
+function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))>>>0; } return h; }
+function monogram(title){
+  const words = title.replace(/[^A-Za-z0-9 ]/g,'').split(' ').filter(Boolean);
+  if(words.length>=2) return (words[0][0]+words[1][0]).toUpperCase();
+  return title.slice(0,2).toUpperCase();
+}
+function fmtDate(ts){
+  if(!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('en-US',{month:'short', year:'numeric'});
+}
+
+let DATA = [];
+let activeCat = 'all';
+let viewMode = 'list';
+let isAdmin = false;
+
+const entriesEl = document.getElementById('entries');
+const emptyEl = document.getElementById('empty');
+const loadingEl = document.getElementById('loadingMsg');
+const mastheadMeta = document.getElementById('mastheadMeta');
+
+async function loadEntries(){
+  loadingEl.style.display = 'block';
+  const q = query(entriesCol, orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  DATA = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  loadingEl.style.display = 'none';
+  mastheadMeta.innerHTML = `Vol. 1 &mdash; Entry ${String(DATA.length).padStart(3,'0')}<br>Est. 2026`;
+  render();
+}
+
+function render(){
+  entriesEl.className = viewMode === 'grid' ? 'view-grid' : '';
+  const filtered = DATA.filter(d => activeCat === 'all' || d.cat === activeCat);
+  entriesEl.innerHTML = '';
+  emptyEl.style.display = filtered.length ? 'none' : 'block';
+
+  filtered.forEach(d => {
+    const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
+    const artInner = d.coverPhoto
+      ? `<img src="${d.coverPhoto}" alt="${d.title}" style="width:100%;height:100%;object-fit:cover;">`
+      : monogram(d.title || '??');
+    const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
+    const entry = document.createElement('div');
+    entry.className = 'entry';
+    entry.dataset.id = d.id;
+    entry.innerHTML = `
+      <div class="entry-row">
+        <div class="entry-art" ${artStyle}>${artInner}</div>
+        <div class="entry-num"></div>
+        <div class="entry-main">
+          <div class="entry-sub">${CAT_LABELS[d.cat] || d.cat} &middot; ${d.by || ''}</div>
+          <h2>${d.title}</h2>
+          <div class="entry-verdict-line">${d.verdict || ''}</div>
+        </div>
+        <div class="stamp" contenteditable="${isAdmin}" spellcheck="false" data-id="${d.id}">${d.stamp || 'Worth It'}</div>
+        <div class="entry-date">${fmtDate(d.createdAt)}</div>
+      </div>
+      <div class="entry-note">
+        <div class="entry-note-inner">
+          ${d.photos && d.photos.length ? `<div class="photo-strip">${d.photos.map(u => `<img src="${u}" alt="${d.title} photo" onclick="window.open('${u}','_blank')">`).join('')}</div>` : ''}
+          <p>${d.note || ''}</p>
+          <button class="delete-btn" data-id="${d.id}">Delete this entry</button>
+        </div>
+      </div>
+    `;
+    entry.addEventListener('click', (e) => {
+      if(e.target.closest('.stamp') || e.target.closest('.delete-btn')) return;
+      entry.classList.toggle('open');
+    });
+    entriesEl.appendChild(entry);
+  });
+}
+
+// Stamp editing, only meaningful when isAdmin (contenteditable is false otherwise)
+entriesEl.addEventListener('focusout', async (e) => {
+  const el = e.target.closest('.stamp');
+  if(!el || !isAdmin) return;
+  const id = el.dataset.id;
+  const text = el.textContent.trim() || 'Untitled';
+  el.textContent = text;
+  const item = DATA.find(d => d.id === id);
+  if(item) item.stamp = text;
+  await updateDoc(doc(db, 'entries', id), { stamp: text });
+});
+entriesEl.addEventListener('keydown', (e) => {
+  if(e.target.closest('.stamp') && e.key === 'Enter'){
+    e.preventDefault();
+    e.target.blur();
+  }
+});
+entriesEl.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.delete-btn');
+  if(!btn || !isAdmin) return;
+  if(!confirm('Delete this entry for good?')) return;
+  await deleteDoc(doc(db, 'entries', btn.dataset.id));
+  await loadEntries();
+});
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  const btn = e.target.closest('.filter-btn');
+  if(!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = btn.dataset.cat;
+  render();
+});
+
+document.getElementById('viewToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('.view-btn');
+  if(!btn) return;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  viewMode = btn.dataset.view;
+  render();
+});
+
+// --- Auth ---
+const authToggle = document.getElementById('authToggle');
+const authPanel = document.getElementById('authPanel');
+const authLoggedOut = document.getElementById('authLoggedOut');
+const authLoggedIn = document.getElementById('authLoggedIn');
+const authError = document.getElementById('authError');
+const addEntryBar = document.getElementById('addEntryBar');
+
+authToggle.addEventListener('click', () => authPanel.classList.toggle('open'));
+
+document.getElementById('authSignIn').addEventListener('click', async () => {
+  authError.textContent = '';
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    authError.textContent = 'Sign in failed, check your email and password.';
+  }
+});
+
+document.getElementById('authSignOut').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, (user) => {
+  isAdmin = !!user;
+  document.body.classList.toggle('is-admin', isAdmin);
+  authLoggedOut.style.display = isAdmin ? 'none' : 'block';
+  authLoggedIn.style.display = isAdmin ? 'block' : 'none';
+  authToggle.textContent = isAdmin ? 'Admin' : 'Sign in';
+  addEntryBar.classList.toggle('visible', isAdmin);
+  render();
+});
+
+// --- Add entry ---
+const addEntryToggle = document.getElementById('addEntryToggle');
+const addEntryForm = document.getElementById('addEntryForm');
+addEntryToggle.addEventListener('click', () => addEntryForm.classList.toggle('open'));
+
+const catSelect = document.getElementById('fCat');
+const multiPhotoField = document.getElementById('multiPhotoField');
+function toggleMultiPhotoField(){
+  const show = catSelect.value === 'restaurants' || catSelect.value === 'misc';
+  multiPhotoField.style.display = show ? 'block' : 'none';
+}
+catSelect.addEventListener('change', toggleMultiPhotoField);
+toggleMultiPhotoField();
+
+addEntryForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const saveBtn = document.getElementById('saveBtn');
+  const uploadStatus = document.getElementById('uploadStatus');
+  const coverInput = document.getElementById('fCoverPhoto');
+  const multiInput = document.getElementById('fPhotos');
+  const coverFile = coverInput.files && coverInput.files[0];
+  const extraFiles = Array.from(multiInput.files || []);
+
+  saveBtn.disabled = true;
+  let coverUrl = null;
+  let photoUrls = [];
+
+  try {
+    if(coverFile){
+      uploadStatus.textContent = 'Uploading cover photo…';
+      const coverRef = ref(storage, `entries/${Date.now()}-cover-${coverFile.name}`);
+      await uploadBytes(coverRef, coverFile);
+      coverUrl = await getDownloadURL(coverRef);
+    }
+    if(extraFiles.length){
+      uploadStatus.textContent = `Uploading ${extraFiles.length} more photo${extraFiles.length > 1 ? 's' : ''}…`;
+      photoUrls = await Promise.all(extraFiles.map(async (file) => {
+        const fileRef = ref(storage, `entries/${Date.now()}-${file.name}`);
+        await uploadBytes(fileRef, file);
+        return getDownloadURL(fileRef);
+      }));
+    }
+
+    const cat = document.getElementById('fCat').value;
+    const newEntry = {
+      cat,
+      title: document.getElementById('fTitle').value.trim(),
+      by: document.getElementById('fBy').value.trim(),
+      verdict: document.getElementById('fVerdict').value.trim(),
+      note: document.getElementById('fNote').value.trim(),
+      stamp: document.getElementById('fStamp').value.trim() || 'Worth It',
+      coverPhoto: coverUrl,
+      photos: photoUrls,
+      createdAt: new Date()
+    };
+    if(!newEntry.title || !newEntry.verdict){ saveBtn.disabled = false; return; }
+
+    uploadStatus.textContent = 'Saving entry…';
+    await addDoc(entriesCol, newEntry);
+    addEntryForm.reset();
+    addEntryForm.classList.remove('open');
+    toggleMultiPhotoField();
+    uploadStatus.textContent = '';
+    await loadEntries();
+  } catch (err) {
+    uploadStatus.textContent = 'Something went wrong, try again.';
+  } finally {
+    saveBtn.disabled = false;
+  }
+});
+
+loadEntries();
+</script>
+</body>
+</html>
