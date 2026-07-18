@@ -252,17 +252,18 @@
   .auth-error{font-size:10px;color:#8A3324;margin-top:6px;}
   .signed-in-badge{font-size:10px;color:var(--accent-2);margin-bottom:8px;text-align:center;}
 
-  .add-entry-bar{display:none;margin-bottom:20px;}
-  .add-entry-bar.visible{display:block;}
   .add-entry-toggle{
-    font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
-    background:transparent;border:1px dashed var(--accent-2);color:var(--accent-2);padding:9px 16px;
-    cursor:pointer;width:100%;text-align:left;border-radius:4px;
+    display:none;
+    font-family:'IBM Plex Mono', monospace;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;
+    color:var(--accent-2);cursor:pointer;background:transparent;border:1px solid var(--accent-2);
+    border-radius:999px;padding:9px 14px;
   }
+  .add-entry-toggle:hover{background:var(--paper-2);}
+  body.is-admin .add-entry-toggle{display:inline-flex;align-items:center;}
   .add-entry-form{
-    display:none;margin-top:10px;padding:16px;border:1px solid var(--rule);border-radius:6px;background:#F5F3EC;
+    display:none;padding:16px;border:1px solid var(--rule);border-radius:6px;background:#F5F3EC;
   }
-  .add-entry-form.open{display:grid;gap:8px;}
+  .add-entry-form.open{display:grid;gap:8px;margin-bottom:20px;}
   .add-entry-form input, .add-entry-form select, .add-entry-form textarea{
     font-family:'Source Serif 4', serif;font-size:14px;padding:8px 10px;border:1px solid var(--rule);
     border-radius:4px;background:#fff;width:100%;
@@ -439,32 +440,6 @@
   </div>
   <div class="tagline">Things I've watched, listened, read, ate, and thought.</div>
 
-  <div class="add-entry-bar" id="addEntryBar">
-    <button class="add-entry-toggle" id="addEntryToggle">+ Log a new entry</button>
-    <form class="add-entry-form" id="addEntryForm">
-      <select id="fCat">
-        <option value="film">Film</option>
-        <option value="music">Music</option>
-        <option value="books">Books</option>
-        <option value="restaurants">Food</option>
-        <option value="misc">Misc</option>
-      </select>
-      <input type="text" id="fTitle" placeholder="Title" required>
-      <input type="text" id="fBy" placeholder="By / director / location">
-      <input type="text" id="fVerdict" placeholder="One-line verdict" required>
-      <textarea id="fNote" placeholder="The full note"></textarea>
-      <input type="text" id="fStamp" placeholder="Stamp label (e.g. Essential)" value="Worth It">
-      <label class="field-label">Cover photo (compressed automatically, used as the tile image)</label>
-      <input type="file" id="fCoverPhoto" accept="image/*">
-      <div id="multiPhotoField" style="display:none;">
-        <label class="field-label">Additional photos</label>
-        <input type="file" id="fPhotos" accept="image/*" multiple>
-      </div>
-      <div class="upload-status" id="uploadStatus"></div>
-      <button type="submit" id="saveBtn">Save entry</button>
-    </form>
-  </div>
-
   <div id="listView">
   <div class="toolbar">
     <div class="filters" id="filters">
@@ -482,7 +457,31 @@
       <button class="view-btn" data-view="list">List</button>
       <button class="view-btn active" data-view="grid">Grid</button>
     </div>
+    <button class="add-entry-toggle" id="addEntryToggle">+ New Entry</button>
   </div>
+
+  <form class="add-entry-form" id="addEntryForm">
+    <select id="fCat">
+      <option value="film">Film</option>
+      <option value="music">Music</option>
+      <option value="books">Books</option>
+      <option value="restaurants">Food</option>
+      <option value="misc">Misc</option>
+    </select>
+    <input type="text" id="fTitle" placeholder="Title" required>
+    <input type="text" id="fBy" placeholder="By / director / location">
+    <input type="text" id="fVerdict" placeholder="One-line verdict" required>
+    <textarea id="fNote" placeholder="The full note"></textarea>
+    <input type="text" id="fStamp" placeholder="Stamp label (e.g. Essential)" value="Worth It">
+    <label class="field-label">Cover photo (compressed automatically, used as the tile image)</label>
+    <input type="file" id="fCoverPhoto" accept="image/*">
+    <div id="multiPhotoField" style="display:none;">
+      <label class="field-label">Additional photos</label>
+      <input type="file" id="fPhotos" accept="image/*" multiple>
+    </div>
+    <div class="upload-status" id="uploadStatus"></div>
+    <button type="submit" id="saveBtn">Save entry</button>
+  </form>
 
   <div class="loading-msg" id="loadingMsg">Loading entries&hellip;</div>
   <div id="entries"></div>
@@ -821,7 +820,6 @@ const authPanel = document.getElementById('authPanel');
 const authLoggedOut = document.getElementById('authLoggedOut');
 const authLoggedIn = document.getElementById('authLoggedIn');
 const authError = document.getElementById('authError');
-const addEntryBar = document.getElementById('addEntryBar');
 
 authToggle.addEventListener('click', () => authPanel.classList.toggle('open'));
 
@@ -844,7 +842,6 @@ onAuthStateChanged(auth, (user) => {
   authLoggedOut.style.display = isAdmin ? 'none' : 'block';
   authLoggedIn.style.display = isAdmin ? 'block' : 'none';
   authToggle.textContent = isAdmin ? 'Admin' : 'Sign in';
-  addEntryBar.classList.toggle('visible', isAdmin);
   render();
   route();
 });
