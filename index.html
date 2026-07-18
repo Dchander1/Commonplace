@@ -380,7 +380,7 @@
 </style>
 </head>
 <body>
-<div class="deco-spine" aria-hidden="true">Commonplace &middot; Vol. 1 &middot; Est. 2026 &middot; Commonplace &middot; Vol. 1 &middot; Est. 2026</div>
+<div class="deco-spine" aria-hidden="true">Commonplace &middot; Vol. I &middot; Est. MMXXVI &middot; Commonplace &middot; Vol. I &middot; Est. MMXXVI</div>
 <div class="deco-ruler" aria-hidden="true"></div>
 <div class="deco-watermark" aria-hidden="true">C</div>
 <div class="wrap">
@@ -391,7 +391,7 @@
       <button class="about-toggle" id="aboutToggle" aria-expanded="false">What is this?</button>
       <p class="about-text" id="aboutText" hidden>For the longest time I've wanted something like this. I've been listening to music, watching movies, reading things, and more recently, eating at amazing places, with so much to say and nowhere for it to go. This is that outlet, my little corner of the internet. Feel free to agree or disagree! I don't consider myself a critic, but you can consider me whatever you'd like :)</p>
     </div>
-    <div class="masthead-meta" id="mastheadMeta">Vol. 1 &mdash; Entry &hellip;<br>Est. 2026</div>
+    <div class="masthead-meta" id="mastheadMeta">Vol. I &mdash; Entry &hellip;<br>Est. MMXXVI</div>
   </div>
   <div class="tagline">Things I've watched, listened, read, ate &mdash; and thought.</div>
 
@@ -578,6 +578,19 @@ function fmtDate(ts){
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString('en-US',{month:'short', year:'numeric'});
 }
+function toRoman(num){
+  if(!Number.isFinite(num) || num <= 0) return '0';
+  const table = [
+    [1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],
+    [100,'C'],[90,'XC'],[50,'L'],[40,'XL'],
+    [10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']
+  ];
+  let result = '';
+  for(const [value, symbol] of table){
+    while(num >= value){ result += symbol; num -= value; }
+  }
+  return result;
+}
 function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
   const foodRatio = d.cat === 'restaurants';
@@ -602,7 +615,7 @@ async function loadEntries(){
   const snap = await getDocs(q);
   DATA = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   loadingEl.style.display = 'none';
-  mastheadMeta.innerHTML = `Vol. 1 &mdash; Entry ${String(DATA.length).padStart(3,'0')}<br>Est. 2026`;
+  mastheadMeta.innerHTML = `Vol. I &mdash; Entry ${toRoman(DATA.length)}<br>Est. MMXXVI`;
   render();
   route();
 }
