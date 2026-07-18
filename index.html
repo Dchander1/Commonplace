@@ -142,9 +142,9 @@
   /* No photo to take a natural ratio from, so the monogram fallback stays a plain square */
   #entries.view-grid .entry-art.no-photo{aspect-ratio:1/1;}
   #entries.view-grid .entry-art img{width:100%;height:auto;display:block;}
-  /* Food stays a fixed square (cropped if needed) regardless of the uploaded photo's own shape */
-  #entries.view-grid .entry-art.square{aspect-ratio:1/1;}
-  #entries.view-grid .entry-art.square img{height:100%;object-fit:cover;}
+  /* Food stays locked to this 4:5 ratio (cropped if needed) regardless of the uploaded photo's own shape */
+  #entries.view-grid .entry-art.food-ratio{aspect-ratio:4/5;}
+  #entries.view-grid .entry-art.food-ratio img{height:100%;object-fit:cover;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
@@ -288,8 +288,8 @@
     font-family:'Fraunces', serif;font-weight:600;font-size:64px;color:#fff;
   }
   .article-hero img{width:100%;height:100%;object-fit:cover;}
-  /* Restaurants match the square tile from the list/grid instead of the default 16:9 hero */
-  .article-hero.square{aspect-ratio:1/1;}
+  /* Restaurants match the food tile's 4:5 ratio instead of the default 16:9 hero */
+  .article-hero.food-ratio{aspect-ratio:4/5;}
   /* Film & books show the uploaded photo at its real proportions, not cropped to 16:9 */
   .article-hero.fit{aspect-ratio:auto;width:fit-content;max-width:48%;height:auto;max-height:70vh;}
   .article-hero.fit img{width:auto;height:auto;max-width:100%;max-height:70vh;object-fit:contain;display:block;}
@@ -527,10 +527,10 @@ function fmtDate(ts){
 }
 function heroArt(d){
   const [c1, c2] = PALETTES[hashStr(d.title || '') % PALETTES.length];
-  const square = d.cat === 'restaurants';
+  const foodRatio = d.cat === 'restaurants';
   return d.coverPhoto
-    ? { style:'', inner:`<img src="${d.coverPhoto}" alt="${d.title}">`, fit: HERO_FIT_CATS.has(d.cat), square }
-    : { style:`background:linear-gradient(135deg, ${c1}, ${c2});`, inner: monogram(d.title || '??'), fit: false, square };
+    ? { style:'', inner:`<img src="${d.coverPhoto}" alt="${d.title}">`, fit: HERO_FIT_CATS.has(d.cat), foodRatio }
+    : { style:`background:linear-gradient(135deg, ${c1}, ${c2});`, inner: monogram(d.title || '??'), fit: false, foodRatio };
 }
 let DATA = [];
 let activeCat = 'all';
@@ -560,7 +560,7 @@ const editEntryForm = document.getElementById('editEntryForm');
 function showArticle(entry){
   const hero = heroArt(entry);
   const heroEl = document.getElementById('articleHero');
-  heroEl.className = 'article-hero' + (hero.fit ? ' fit' : '') + (hero.square ? ' square' : '');
+  heroEl.className = 'article-hero' + (hero.fit ? ' fit' : '') + (hero.foodRatio ? ' food-ratio' : '');
   heroEl.setAttribute('style', hero.style);
   heroEl.innerHTML = hero.inner;
   document.getElementById('articleSub').textContent = `${CAT_LABELS[entry.cat] || entry.cat} · ${entry.by || ''}`;
@@ -613,7 +613,7 @@ function render(){
       ? `<img src="${d.coverPhoto}" alt="${d.title}">`
       : monogram(d.title || '??');
     const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
-    const artClass = 'entry-art' + (useFit ? ' fit' : '') + (d.coverPhoto ? '' : ' no-photo') + (d.cat === 'restaurants' ? ' square' : '');
+    const artClass = 'entry-art' + (useFit ? ' fit' : '') + (d.coverPhoto ? '' : ' no-photo') + (d.cat === 'restaurants' ? ' food-ratio' : '');
     const byLine = d.by ? `<div class="entry-by">${d.by}</div>` : '';
     const entry = document.createElement('div');
     entry.className = 'entry';
