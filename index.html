@@ -771,9 +771,13 @@ document.addEventListener('focusout', async (e) => {
   const id = el.dataset.id;
   if(!id) return;
   const text = el.textContent.trim() || 'Untitled';
-  el.textContent = text;
   const item = DATA.find(d => d.id === id);
   if(item) item.stamp = text;
+  // The same entry's stamp can be on screen twice at once (its tile, still in the DOM
+  // behind the article view, and the article view's own stamp) — keep every copy in sync.
+  document.querySelectorAll('.stamp').forEach(s => {
+    if(s.dataset.id === id) s.textContent = text;
+  });
   await updateDoc(doc(db, 'entries', id), { stamp: text });
 });
 document.addEventListener('keydown', (e) => {
