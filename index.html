@@ -345,7 +345,7 @@
         <option value="film">Film</option>
         <option value="music">Music</option>
         <option value="books">Books</option>
-        <option value="restaurants">Restaurants</option>
+        <option value="restaurants">Food</option>
         <option value="misc">Misc</option>
       </select>
       <input type="text" id="fTitle" placeholder="Title" required>
@@ -371,7 +371,7 @@
       <button class="filter-btn" data-cat="film">Film</button>
       <button class="filter-btn" data-cat="music">Music</button>
       <button class="filter-btn" data-cat="books">Books</button>
-      <button class="filter-btn" data-cat="restaurants">Restaurants</button>
+      <button class="filter-btn" data-cat="restaurants">Food</button>
       <button class="filter-btn" data-cat="misc">Misc</button>
     </div>
     <div class="view-toggle" id="viewToggle">
@@ -408,7 +408,7 @@
         <option value="film">Film</option>
         <option value="music">Music</option>
         <option value="books">Books</option>
-        <option value="restaurants">Restaurants</option>
+        <option value="restaurants">Food</option>
         <option value="misc">Misc</option>
       </select>
       <input type="text" id="eTitle" placeholder="Title" required>
@@ -494,7 +494,7 @@ function compressImage(file, maxWidth, quality){
   });
 }
 
-const CAT_LABELS = { film:'Film', music:'Music', books:'Books', restaurants:'Restaurants', misc:'Misc' };
+const CAT_LABELS = { film:'Film', music:'Music', books:'Books', restaurants:'Food', misc:'Misc' };
 // Movie posters and book covers keep their real proportions instead of a forced square/16:9 crop
 const FIT_CATS = new Set(['film', 'books']);
 
