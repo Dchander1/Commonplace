@@ -142,6 +142,9 @@
   /* No photo to take a natural ratio from, so the monogram fallback stays a plain square */
   #entries.view-grid .entry-art.no-photo{aspect-ratio:1/1;}
   #entries.view-grid .entry-art img{width:100%;height:auto;display:block;}
+  /* Food stays a fixed square (cropped if needed) regardless of the uploaded photo's own shape */
+  #entries.view-grid .entry-art.square{aspect-ratio:1/1;}
+  #entries.view-grid .entry-art.square img{height:100%;object-fit:cover;}
   #entries.view-grid .entry-num,
   #entries.view-grid .entry-date,
   #entries.view-grid .entry-sub,
@@ -610,7 +613,7 @@ function render(){
       ? `<img src="${d.coverPhoto}" alt="${d.title}">`
       : monogram(d.title || '??');
     const artStyle = d.coverPhoto ? '' : `style="background:linear-gradient(135deg, ${c1}, ${c2});"`;
-    const artClass = 'entry-art' + (useFit ? ' fit' : '') + (d.coverPhoto ? '' : ' no-photo');
+    const artClass = 'entry-art' + (useFit ? ' fit' : '') + (d.coverPhoto ? '' : ' no-photo') + (d.cat === 'restaurants' ? ' square' : '');
     const byLine = d.by ? `<div class="entry-by">${d.by}</div>` : '';
     const entry = document.createElement('div');
     entry.className = 'entry';
