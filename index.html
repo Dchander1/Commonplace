@@ -293,11 +293,15 @@
     font-family:'IBM Plex Mono', monospace;font-size:10.5px;color:var(--muted);
     text-transform:uppercase;letter-spacing:0.05em;display:block;
   }
-  .checkbox-label{
-    font-family:'Source Serif 4', serif;font-size:13px;color:#4a473f;
-    display:flex;align-items:center;gap:7px;
+  .edit-photos-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .edit-photo-thumb{position:relative;width:70px;height:70px;border-radius:5px;overflow:hidden;border:1px solid var(--rule);flex-shrink:0;}
+  .edit-photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .edit-photo-thumb button{
+    position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;
+    background:rgba(28,27,25,0.75);color:#fff;border:none;font-size:12px;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;
   }
-  .add-entry-form input[type="checkbox"]{width:auto;padding:0;border:none;background:none;flex-shrink:0;}
+  .edit-photo-thumb button:hover{background:rgba(28,27,25,0.9);}
 
   /* Article view */
   .back-link{
@@ -537,9 +541,10 @@
       <input type="text" id="eStampInput" placeholder="Stamp label (e.g. Essential)">
       <label class="field-label">Replace cover photo (compressed automatically; leave blank to keep the current one)</label>
       <input type="file" id="eCoverPhoto" accept="image/*">
-      <label class="field-label">Replace additional photos (leave blank to keep current; uploading new ones replaces the whole set)</label>
+      <label class="field-label">Additional photos (click &times; to remove one)</label>
+      <div class="edit-photos-strip" id="eExistingPhotos"></div>
+      <label class="field-label">Add more photos</label>
       <input type="file" id="ePhotos" accept="image/*" multiple>
-      <label class="checkbox-label"><input type="checkbox" id="eClearPhotos"> Remove all additional photos</label>
       <div class="upload-status" id="editUploadStatus"></div>
       <button type="submit" id="editSaveBtn">Save changes</button>
     </form>
@@ -701,6 +706,26 @@ async function loadEntries(){
 const listViewEl = document.getElementById('listView');
 const articleViewEl = document.getElementById('articleView');
 const editEntryForm = document.getElementById('editEntryForm');
+
+// Additional photos being kept for the entry currently open in the edit form —
+// starts as a copy of the entry's existing photos; removing a thumbnail just
+// drops it from this array until Save actually persists the change.
+let eKeptPhotos = [];
+function renderEditPhotoThumbs(){
+  const strip = document.getElementById('eExistingPhotos');
+  strip.innerHTML = eKeptPhotos.map((url, i) => `
+    <div class="edit-photo-thumb">
+      <img src="${url}" alt="Additional photo ${i + 1}">
+      <button type="button" data-index="${i}" aria-label="Remove this photo">&times;</button>
+    </div>
+  `).join('');
+}
+document.getElementById('eExistingPhotos').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-index]');
+  if(!btn) return;
+  eKeptPhotos.splice(Number(btn.dataset.index), 1);
+  renderEditPhotoThumbs();
+});
 
 function showArticle(entry){
   const hero = heroArt(entry);
@@ -977,7 +1002,8 @@ document.getElementById('articleEditBtn').addEventListener('click', () => {
   document.getElementById('eStampInput').value = entry.stamp || '';
   document.getElementById('eCoverPhoto').value = '';
   document.getElementById('ePhotos').value = '';
-  document.getElementById('eClearPhotos').checked = false;
+  eKeptPhotos = (entry.photos || []).slice();
+  renderEditPhotoThumbs();
   document.getElementById('editUploadStatus').textContent = '';
   editEntryForm.dataset.id = id;
   editEntryForm.classList.toggle('open');
@@ -992,7 +1018,6 @@ editEntryForm.addEventListener('submit', async (e) => {
   const multiInput = document.getElementById('ePhotos');
   const coverFile = coverInput.files && coverInput.files[0];
   const extraFiles = Array.from(multiInput.files || []);
-  const clearPhotos = document.getElementById('eClearPhotos').checked;
 
   const updates = {
     cat: document.getElementById('eCat').value,
@@ -1012,15 +1037,15 @@ editEntryForm.addEventListener('submit', async (e) => {
     }
     if(extraFiles.length){
       uploadStatus.textContent = `Compressing ${extraFiles.length} more photo${extraFiles.length > 1 ? 's' : ''}…`;
-      updates.photos = await Promise.all(extraFiles.map(file => compressImage(file, 700, 0.6)));
-    } else if(clearPhotos){
-      updates.photos = [];
+      const newUrls = await Promise.all(extraFiles.map(file => compressImage(file, 700, 0.6)));
+      updates.photos = eKeptPhotos.concat(newUrls);
+    } else {
+      updates.photos = eKeptPhotos;
     }
 
     const existing = DATA.find(d => d.id === id) || {};
     const coverForCheck = 'coverPhoto' in updates ? updates.coverPhoto : (existing.coverPhoto || '');
-    const photosForCheck = 'photos' in updates ? updates.photos : (existing.photos || []);
-    const totalBytes = (coverForCheck ? coverForCheck.length : 0) + photosForCheck.reduce((sum, u) => sum + u.length, 0);
+    const totalBytes = (coverForCheck ? coverForCheck.length : 0) + updates.photos.reduce((sum, u) => sum + u.length, 0);
     if(totalBytes > MAX_DOC_BYTES){
       uploadStatus.textContent = 'Photos are still too large even compressed — try fewer additional photos.';
       saveBtn.disabled = false;
