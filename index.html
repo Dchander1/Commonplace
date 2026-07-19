@@ -173,6 +173,7 @@
     background:rgba(28,27,25,0.62);border-color:rgba(255,255,255,0.7);color:#fff;backdrop-filter:blur(2px);
   }
   #entries.view-grid .stamp:focus{background:rgba(28,27,25,0.85);}
+  #entries.view-grid .stamp:empty[contenteditable="false"]{padding:0;background:transparent;border:none;}
 
   .filters{display:flex;gap:2px;border:1px solid var(--ink);width:fit-content;flex-wrap:wrap;}
   .filter-btn{
@@ -219,6 +220,12 @@
   .stamp:hover{border-style:dashed;}
   .stamp:focus{border-style:solid;background:rgba(47,74,67,0.06);}
   .stamp[contenteditable="false"]{cursor:default;opacity:0.9;}
+  /* No stamp set and not editable here — collapse it entirely instead of showing an empty pill.
+     Admin's empty stamps stay visible/clickable so there's still a way to add one inline. */
+  .stamp:empty[contenteditable="false"]{border:none;padding:0;min-width:0;margin-top:0;}
+  /* Article meta row is a flex layout (not a fixed-column grid), so a fully-empty stamp
+     here can just be removed instead of collapsed, avoiding a stray gap next to the date */
+  .article-meta-row .stamp:empty[contenteditable="false"]{display:none;}
 
   .empty{
     font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);text-transform:uppercase;
@@ -489,7 +496,7 @@
     <input type="text" id="fBy" placeholder="By / director / location">
     <input type="text" id="fVerdict" placeholder="One-line verdict" required>
     <textarea id="fNote" placeholder="The full note"></textarea>
-    <input type="text" id="fStamp" placeholder="Stamp label (e.g. Essential)" value="Worth It">
+    <input type="text" id="fStamp" placeholder="Stamp label (e.g. Essential) — optional, leave blank for no tag">
     <label class="field-label">Cover photo (compressed automatically, used as the tile image)</label>
     <input type="file" id="fCoverPhoto" accept="image/*">
     <div id="multiPhotoField" style="display:none;">
@@ -538,7 +545,7 @@
       <input type="text" id="eBy" placeholder="By / director / location">
       <input type="text" id="eVerdict" placeholder="One-line verdict" required>
       <textarea id="eNote" placeholder="The full note"></textarea>
-      <input type="text" id="eStampInput" placeholder="Stamp label (e.g. Essential)">
+      <input type="text" id="eStampInput" placeholder="Stamp label (e.g. Essential) — optional, leave blank for no tag">
       <label class="field-label">Replace cover photo (compressed automatically; leave blank to keep the current one)</label>
       <input type="file" id="eCoverPhoto" accept="image/*">
       <label class="field-label">Additional photos (click &times; to remove one)</label>
@@ -737,7 +744,7 @@ function showArticle(entry){
   document.getElementById('articleTitle').textContent = entry.title;
   document.getElementById('articleVerdict').textContent = entry.verdict || '';
   const stampEl = document.getElementById('articleStamp');
-  stampEl.textContent = entry.stamp || 'Worth It';
+  stampEl.textContent = entry.stamp || '';
   stampEl.dataset.id = entry.id;
   stampEl.setAttribute('contenteditable', isAdmin);
   document.getElementById('articleDate').textContent = fmtDate(entry.createdAt);
@@ -804,7 +811,7 @@ function render(){
           ${byLine}
           <div class="entry-verdict-line">${d.verdict || ''}</div>
         </div>
-        <div class="stamp" contenteditable="${isAdmin}" spellcheck="false" data-id="${d.id}">${d.stamp || 'Worth It'}</div>
+        <div class="stamp" contenteditable="${isAdmin}" spellcheck="false" data-id="${d.id}">${d.stamp || ''}</div>
         <div class="entry-date">${fmtDate(d.createdAt)}</div>
       </div>
     `;
@@ -823,7 +830,7 @@ document.addEventListener('focusout', async (e) => {
   if(!el || !isAdmin) return;
   const id = el.dataset.id;
   if(!id) return;
-  const text = el.textContent.trim() || 'Untitled';
+  const text = el.textContent.trim();
   const item = DATA.find(d => d.id === id);
   if(item) item.stamp = text;
   // The same entry's stamp can be on screen twice at once (its tile, still in the DOM
@@ -967,7 +974,7 @@ addEntryForm.addEventListener('submit', async (e) => {
       by: document.getElementById('fBy').value.trim(),
       verdict: document.getElementById('fVerdict').value.trim(),
       note: document.getElementById('fNote').value.trim(),
-      stamp: document.getElementById('fStamp').value.trim() || 'Worth It',
+      stamp: document.getElementById('fStamp').value.trim(),
       coverPhoto: coverUrl,
       photos: photoUrls,
       createdAt: new Date()
@@ -1025,7 +1032,7 @@ editEntryForm.addEventListener('submit', async (e) => {
     by: document.getElementById('eBy').value.trim(),
     verdict: document.getElementById('eVerdict').value.trim(),
     note: document.getElementById('eNote').value.trim(),
-    stamp: document.getElementById('eStampInput').value.trim() || 'Worth It'
+    stamp: document.getElementById('eStampInput').value.trim()
   };
   if(!updates.title || !updates.verdict) return;
 
