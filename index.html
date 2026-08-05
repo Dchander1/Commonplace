@@ -756,7 +756,7 @@ function showArticle(entry){
   heroEl.innerHTML = hero.inner;
   document.getElementById('articleSub').textContent = `${CAT_LABELS[entry.cat] || entry.cat} · ${entry.by || ''}`;
   document.getElementById('articleTitle').textContent = entry.title;
-  document.getElementById('articleVerdict').textContent = entry.verdict || '';
+  document.getElementById('articleVerdict').innerHTML = formatNote(entry.verdict);
   const stampEl = document.getElementById('articleStamp');
   stampEl.textContent = entry.stamp || '';
   stampEl.dataset.id = entry.id;
