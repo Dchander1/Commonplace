@@ -500,7 +500,7 @@
     <input type="text" id="fTitle" placeholder="Title" required>
     <input type="text" id="fBy" placeholder="By / director / location">
     <input type="text" id="fVerdict" placeholder="One-line verdict" required>
-    <textarea id="fNote" placeholder="The full note"></textarea>
+    <textarea id="fNote" placeholder="The full note — wrap words in *asterisks* or _underscores_ for italics"></textarea>
     <input type="text" id="fStamp" placeholder="Stamp label (e.g. Essential) — optional, leave blank for no tag">
     <label class="field-label">Cover photo (compressed automatically, used as the tile image)</label>
     <input type="file" id="fCoverPhoto" accept="image/*">
@@ -549,7 +549,7 @@
       <input type="text" id="eTitle" placeholder="Title" required>
       <input type="text" id="eBy" placeholder="By / director / location">
       <input type="text" id="eVerdict" placeholder="One-line verdict" required>
-      <textarea id="eNote" placeholder="The full note"></textarea>
+      <textarea id="eNote" placeholder="The full note — wrap words in *asterisks* or _underscores_ for italics"></textarea>
       <input type="text" id="eStampInput" placeholder="Stamp label (e.g. Essential) — optional, leave blank for no tag">
       <label class="field-label">Replace cover photo (compressed automatically; leave blank to keep the current one)</label>
       <input type="file" id="eCoverPhoto" accept="image/*">
@@ -655,6 +655,15 @@ function fmtDate(ts){
   const d = ts.toDate ? ts.toDate() : new Date(ts);
   return d.toLocaleDateString('en-US',{month:'short', year:'numeric'});
 }
+// Lets *text* or _text_ render as italic in the note. Escapes HTML first since this is
+// rendered via innerHTML, then wraps the matched spans in <em>.
+function formatNote(text){
+  let escaped = (text || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  escaped = escaped.replace(/\*([^\n*]+)\*/g, '<em>$1</em>');
+  escaped = escaped.replace(/_([^\n_]+)_/g, '<em>$1</em>');
+  return escaped;
+}
 function toRoman(num){
   if(!Number.isFinite(num) || num <= 0) return '0';
   const table = [
@@ -756,7 +765,7 @@ function showArticle(entry){
   document.getElementById('articlePhotos').innerHTML = entry.photos && entry.photos.length
     ? entry.photos.map(u => `<img src="${u}" alt="${entry.title} photo" onclick="window.open('${u}','_blank')">`).join('')
     : '';
-  document.getElementById('articleNote').textContent = entry.note || '';
+  document.getElementById('articleNote').innerHTML = formatNote(entry.note);
   document.getElementById('articleEditBtn').dataset.id = entry.id;
   document.getElementById('articleDeleteBtn').dataset.id = entry.id;
   editEntryForm.classList.remove('open');
