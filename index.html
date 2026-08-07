@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23EFEDE6'/%3E%3Ctext x='32' y='45' font-family='Georgia, serif' font-size='40' font-weight='700' fill='%23A6763D' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#EFEDE6;
@@ -31,17 +31,18 @@
 
   .masthead{
     display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
     border-bottom:3px solid var(--ink);
-    padding-bottom:18px;
+    padding-bottom:22px;
     margin-bottom:8px;
   }
-  .masthead-title{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:18px;}
+  .masthead-title{}
   .masthead h1{
     font-family:'Fraunces', serif;
-    font-weight:600;
-    font-size:clamp(40px, 7vw, 64px);
+    font-weight:700;
+    font-size:clamp(56px, 11vw, 104px);
     letter-spacing:-0.01em;
     line-height:1;
     margin:0;
@@ -61,27 +62,37 @@
   }
   .about-toggle:hover{background:var(--paper-2);}
   .masthead-meta{
-    text-align:right;
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
     letter-spacing:0.06em;
     color:var(--muted);
     text-transform:uppercase;
     line-height:1.6;
+    margin-bottom:12px;
+  }
+  .tagline-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:14px;
+    margin:14px 0 28px;
   }
   .tagline{
     font-family:'Fraunces', serif;
     font-style:italic;
     font-size:15px;
     color:var(--muted);
-    margin:10px 0 28px;
+    margin:0;
   }
 
   /* Anchored as a dropdown right under the toggle button, not stuck in the page flow below the tagline */
   .about-text{
     position:absolute;
     top:calc(100% + 10px);
-    left:0;
+    left:50%;
+    transform:translateX(-50%);
     z-index:20;
     font-family:'Source Serif 4', serif;
     font-size:14.5px;
@@ -93,6 +104,7 @@
     border:1px solid var(--ink);
     border-radius:8px;
     box-shadow:0 8px 24px rgba(0,0,0,0.16);
+    text-align:left;
   }
 
   /* Same box model as .filters/.view-toggle (bordered wrapper + border:none inner buttons/input,
@@ -361,9 +373,6 @@
   }
 
   @media (max-width:560px){
-    .masthead{flex-direction:column;align-items:flex-start;gap:10px;}
-    .masthead-title{width:100%;}
-    .masthead-meta{text-align:left;}
     .entry-row{grid-template-columns:84px 20px 1fr;}
     .entry-art{width:84px;height:84px;font-size:24px;}
     .entry-art.fit{max-width:150px;}
@@ -462,14 +471,16 @@
 <div class="wrap">
 
   <div class="masthead">
+    <div class="masthead-meta" id="mastheadMeta">Vol. I &mdash; Entry &hellip;<br>Est. MMXXVI</div>
     <div class="masthead-title">
       <h1><span id="mastheadH1Text">Commonplace</span><canvas id="liquidLogoCanvas" aria-hidden="true"></canvas></h1>
-      <button class="about-toggle" id="aboutToggle" aria-expanded="false">What is this?</button>
-      <p class="about-text" id="aboutText" hidden>For the longest time I've wanted something like this. I've been listening to music, watching movies, reading things, and more recently, eating at amazing places, with so much to say and nowhere for it to go. This is that outlet, my little corner of the internet. Feel free to agree or disagree, I don't consider myself a critic, but you can consider me whatever you'd like :)</p>
     </div>
-    <div class="masthead-meta" id="mastheadMeta">Vol. I &mdash; Entry &hellip;<br>Est. MMXXVI</div>
   </div>
-  <div class="tagline">Things I've watched, listened, read, ate, and thought.</div>
+  <div class="tagline-row">
+    <div class="tagline">Things I've watched, listened, read, ate, and thought.</div>
+    <button class="about-toggle" id="aboutToggle" aria-expanded="false">What is this?</button>
+    <p class="about-text" id="aboutText" hidden>For the longest time I've wanted something like this. I've been listening to music, watching movies, reading things, and more recently, eating at amazing places, with so much to say and nowhere for it to go. This is that outlet, my little corner of the internet. Feel free to agree or disagree, I don't consider myself a critic, but you can consider me whatever you'd like :)</p>
+  </div>
 
   <div id="listView">
   <div class="toolbar">
@@ -1309,7 +1320,7 @@ loadEntries();
     var scale = 4; // supersample so the bevel/edges stay crisp
     var fontSize = 130 * scale;
     var probe = document.createElement('canvas').getContext('2d');
-    probe.font = '600 ' + fontSize + 'px Fraunces, Georgia, serif';
+    probe.font = '700 ' + fontSize + 'px Fraunces, Georgia, serif';
     var textWidth = Math.ceil(probe.measureText(text).width);
     var padding = fontSize * 0.3;
 
@@ -1320,7 +1331,7 @@ loadEntries();
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#000';
-    ctx.font = '600 ' + fontSize + 'px Fraunces, Georgia, serif';
+    ctx.font = '700 ' + fontSize + 'px Fraunces, Georgia, serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillText(text, canvas.width / 2, canvas.height / 2);
@@ -1523,7 +1534,7 @@ loadEntries();
 
   function start(){
     if (document.fonts && document.fonts.load) {
-      document.fonts.load('600 130px Fraunces')
+      document.fonts.load('700 130px Fraunces')
         .then(function(){ return document.fonts.ready; })
         .then(initLiquidLogo)
         .catch(initLiquidLogo);
