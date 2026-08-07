@@ -1347,6 +1347,16 @@ loadEntries();
     ctx.font = '700 ' + fontSize + 'px Fraunces, Georgia, serif';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
+    // The bevel/liquid shading naturally erodes the shape's edges, so the rendered logo reads
+    // noticeably thinner than the plain bold text it replaces. Embolden the source shape itself
+    // (stamp it at several small offsets around a circle, like a synthetic-bold dilation) so the
+    // final liquid-metal glyphs come out just as thick.
+    var emboldenRadius = fontSize * 0.045;
+    var emboldenSteps = 16;
+    for (var i = 0; i < emboldenSteps; i++){
+      var angle = (i / emboldenSteps) * Math.PI * 2;
+      ctx.fillText(text, canvas.width / 2 + Math.cos(angle) * emboldenRadius, canvas.height / 2 + Math.sin(angle) * emboldenRadius);
+    }
     ctx.fillText(text, canvas.width / 2, canvas.height / 2);
     return canvas;
   }
