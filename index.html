@@ -35,8 +35,10 @@
     align-items:end;
     column-gap:16px;
     border-bottom:3px solid var(--ink);
-    padding-bottom:22px;
-    margin-bottom:8px;
+    padding:20px 24px 22px;
+    margin:0 -24px 8px;
+    background:rgba(239,237,230,0.78);
+    border-radius:16px 16px 0 0;
   }
   .masthead-title{grid-column:2;text-align:center;min-width:0;}
   .masthead h1{
@@ -83,7 +85,10 @@
     justify-content:center;
     flex-wrap:wrap;
     gap:14px;
-    margin:14px 0 28px;
+    margin:0 -24px 28px;
+    padding:14px 24px;
+    background:rgba(239,237,230,0.78);
+    border-radius:0 0 16px 16px;
   }
   .tagline{
     font-family:'Fraunces', serif;
@@ -133,7 +138,7 @@
     gap:12px;
     margin-bottom:16px;
   }
-  .view-toggle{display:flex;border:1px solid var(--ink);width:fit-content;max-width:100%;}
+  .view-toggle{display:flex;border:1px solid var(--ink);width:fit-content;max-width:100%;background:rgba(239,237,230,0.85);}
   .view-btn{
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
@@ -195,7 +200,7 @@
   #entries.view-grid .stamp:focus{background:rgba(28,27,25,0.85);}
   #entries.view-grid .stamp:empty:not(:focus){display:none;}
 
-  .filters{display:flex;gap:2px;border:1px solid var(--ink);width:fit-content;max-width:100%;flex-wrap:wrap;}
+  .filters{display:flex;gap:2px;border:1px solid var(--ink);width:fit-content;max-width:100%;flex-wrap:wrap;background:rgba(239,237,230,0.85);}
   .filter-btn{
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
     background:transparent;border:none;border-right:1px solid var(--ink);padding:9px 16px;cursor:pointer;color:var(--ink);
@@ -213,7 +218,7 @@
      since pseudo-elements paint first within their own box, no z-index needed on the rest. */
   .entry::before{
     content:"";position:absolute;inset:0;border-radius:inherit;
-    background:rgba(239,237,230,0.68);pointer-events:none;
+    background:rgba(239,237,230,0.74);pointer-events:none;
   }
   /* Explicit 100%/100% is required here: a <canvas> is a replaced element, so inset:0 alone
      doesn't stretch it to the viewport — without this it displays at its width/height
@@ -268,6 +273,7 @@
   .empty{
     font-family:'IBM Plex Mono', monospace;font-size:12px;color:var(--muted);text-transform:uppercase;
     letter-spacing:0.06em;padding:40px 0;text-align:center;display:none;
+    background:rgba(239,237,230,0.78);border-radius:12px;
   }
 
   /* Auth corner + admin UI */
@@ -369,6 +375,7 @@
   .article-hero.fit{aspect-ratio:auto;width:fit-content;max-width:48%;height:auto;max-height:70vh;}
   .article-hero.fit img{width:auto;height:auto;max-width:100%;max-height:70vh;object-fit:contain;display:block;}
   #articleView::after{content:"";display:table;clear:both;}
+  #articleView{background:rgba(239,237,230,0.78);border-radius:16px;padding:28px 28px 32px;}
   .article-sub{
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
     color:var(--accent-2);margin-bottom:8px;
@@ -390,6 +397,7 @@
   .loading-msg{
     font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);text-transform:uppercase;
     letter-spacing:0.06em;padding:30px 0;text-align:center;
+    background:rgba(239,237,230,0.78);border-radius:12px;
   }
 
   @media (max-width:560px){
@@ -855,7 +863,6 @@ function render(){
     const entry = document.createElement('div');
     entry.className = 'entry';
     entry.dataset.id = d.id;
-    entry.dataset.title = d.title || '';
     entry.innerHTML = `
       <div class="entry-row">
         <div class="${artClass}" ${artStyle}>${artInner}</div>
@@ -1592,28 +1599,20 @@ loadEntries();
 (function(){
   'use strict';
 
-  // Lightweight mesh-gradient card backdrop, inspired by github.com/ruucm/shadergradient but
-  // hand-written in vanilla WebGL2 (no React/Three.js) since this site is one static HTML file.
-  // One shared canvas/context covers the whole viewport; each .entry card gets its own scissored
-  // region drawn into it every frame, rather than giving every card its own WebGL context (which
-  // would blow past the browser's ~16-context-per-page limit once there are more than a
-  // handful of entries on screen).
+  // Vibrant animated mesh-gradient page backdrop, inspired by github.com/ruucm/shadergradient
+  // but hand-written in vanilla WebGL2 (no React/Three.js) since this site is one static HTML
+  // file. One full-viewport draw per frame — no per-card scissoring — so it reads as one
+  // continuous field behind the whole page instead of a patchwork of separate rectangles (that
+  // patchwork was also what caused sharp corners to peek out past each card's rounded edges;
+  // one shared field behind everything means there's no seam at a card's border to begin with).
 
-  // Same warm/muted palette the no-photo monogram fallback already uses, so an entry's color
-  // identity (from its title) matches whether or not it has a photo.
-  var PALETTE_HEX = [
-    ['#8C4A2F','#B5562F'], ['#4A5A3E','#5C6B4F'], ['#8C6A22','#C08A2E'],
-    ['#3F5566','#5C7C8A'], ['#6B4A3E','#8C6A50'], ['#5A3E5C','#7C5C7E'],
-    ['#2F4A43','#456357'], ['#7A3E3E','#A65858']
-  ];
-  var PAPER_RGB = [0.937, 0.929, 0.902]; // #EFEDE6
-
-  function hashStr(s){ var h = 0; for (var i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) >>> 0; } return h; }
+  // Same hue family as the old muted per-entry palette, pushed to full saturation.
+  var COLOR_HEX = ['#D2551F', '#1F7A73', '#E0A526', '#8C2F55'];
   function hexToRgb01(hex){
     var n = parseInt(hex.slice(1), 16);
     return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
   }
-  var PALETTE_RGB = PALETTE_HEX.map(function(pair){ return [hexToRgb01(pair[0]), hexToRgb01(pair[1])]; });
+  var COLOR_RGB = COLOR_HEX.map(hexToRgb01);
 
   var vertexShaderSource = '#version 300 es\n' +
     'precision mediump float;\n' +
@@ -1629,10 +1628,11 @@ loadEntries();
     'in vec2 vUv;\n' +
     'out vec4 fragColor;\n' +
     'uniform float u_time;\n' +
-    'uniform float u_seed;\n' +
-    'uniform vec3 u_color1;\n' +
-    'uniform vec3 u_color2;\n' +
-    'uniform vec3 u_color3;\n' +
+    'uniform vec2 u_resolution;\n' +
+    'uniform vec3 u_colorA;\n' +
+    'uniform vec3 u_colorB;\n' +
+    'uniform vec3 u_colorC;\n' +
+    'uniform vec3 u_colorD;\n' +
     '\n' +
     'vec3 mod289(vec3 x) { return x - floor(x * (1. / 289.)) * 289.; }\n' +
     'vec2 mod289(vec2 x) { return x - floor(x * (1. / 289.)) * 289.; }\n' +
@@ -1662,15 +1662,15 @@ loadEntries();
     '}\n' +
     '\n' +
     'void main() {\n' +
-    '    vec2 uv = vUv;\n' +
-    '    float t = u_time * 0.00006;\n' +
-    '    vec2 p = uv * 1.8 + u_seed;\n' +
-    '    float n1 = snoise(p + vec2(t, -t * 0.8));\n' +
-    '    float n2 = snoise(p * 1.7 - vec2(-t * 0.6, t) + 9.1);\n' +
-    '    float mixAmt = smoothstep(-0.55, 0.55, n1);\n' +
-    '    vec3 col = mix(u_color1, u_color2, mixAmt);\n' +
-    '    float hi = smoothstep(0.25, 0.85, n2);\n' +
-    '    col = mix(col, u_color3, hi * 0.32);\n' +
+    '    vec2 p = vUv;\n' +
+    '    p.x *= u_resolution.x / u_resolution.y;\n' +
+    '    float t = u_time * 0.000035;\n' +
+    '    float n1 = snoise(p * 1.15 + vec2(t, -t * 0.7));\n' +
+    '    float n2 = snoise(p * 1.5 - vec2(-t * 0.5, t * 0.85) + 12.3);\n' +
+    '    float n3 = snoise(p * 0.85 + vec2(t * 0.55, t * 0.4) + 37.1);\n' +
+    '    vec3 col = mix(u_colorA, u_colorB, smoothstep(-0.5, 0.5, n1));\n' +
+    '    col = mix(col, u_colorC, smoothstep(0.1, 0.9, n2) * 0.6);\n' +
+    '    col = mix(col, u_colorD, smoothstep(0.2, 0.85, n3) * 0.5);\n' +
     '    fragColor = vec4(col, 1.0);\n' +
     '}\n';
 
@@ -1681,7 +1681,7 @@ loadEntries();
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
-      console.error('Card gradient shader compile error:', gl.getShaderInfoLog(shader));
+      console.error('Page gradient shader compile error:', gl.getShaderInfoLog(shader));
       gl.deleteShader(shader);
       return null;
     }
@@ -1691,10 +1691,14 @@ loadEntries();
   function init(){
     canvas = document.createElement('canvas');
     canvas.id = 'cardGradientCanvas';
-    document.body.appendChild(canvas);
+    // Insert as the *first* child, not appended at the end: this canvas is opaque (alpha:false)
+    // and z-index:-1, same as the decorative margin elements — at equal z-index, later DOM
+    // position paints on top, so appending last would fully cover them instead of sitting
+    // behind them.
+    document.body.insertBefore(canvas, document.body.firstChild);
 
-    gl = canvas.getContext('webgl2', { antialias: false, alpha: true, preserveDrawingBuffer: false });
-    if (!gl) return; // no WebGL2 support — cards just keep their plain paper-scrim background
+    gl = canvas.getContext('webgl2', { antialias: false, alpha: false, preserveDrawingBuffer: false });
+    if (!gl) return; // no WebGL2 support — body keeps its plain paper background
 
     var vertexShader = createShader(vertexShaderSource, gl.VERTEX_SHADER);
     var fragmentShader = createShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
@@ -1705,7 +1709,7 @@ loadEntries();
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)){
-      console.error('Card gradient program link error:', gl.getProgramInfoLog(program));
+      console.error('Page gradient program link error:', gl.getProgramInfoLog(program));
       return;
     }
 
@@ -1727,6 +1731,11 @@ loadEntries();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
+    gl.uniform3f(uniforms.u_colorA, COLOR_RGB[0][0], COLOR_RGB[0][1], COLOR_RGB[0][2]);
+    gl.uniform3f(uniforms.u_colorB, COLOR_RGB[1][0], COLOR_RGB[1][1], COLOR_RGB[1][2]);
+    gl.uniform3f(uniforms.u_colorC, COLOR_RGB[2][0], COLOR_RGB[2][1], COLOR_RGB[2][2]);
+    gl.uniform3f(uniforms.u_colorD, COLOR_RGB[3][0], COLOR_RGB[3][1], COLOR_RGB[3][2]);
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     requestAnimationFrame(frame);
@@ -1736,47 +1745,16 @@ loadEntries();
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.max(1, Math.round(window.innerWidth * dpr));
     canvas.height = Math.max(1, Math.round(window.innerHeight * dpr));
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uniforms.u_resolution, canvas.width, canvas.height);
   }
 
   var startTime = null;
 
   function frame(now){
     if (startTime === null) startTime = now;
-    var elapsed = now - startTime;
-
-    gl.disable(gl.SCISSOR_TEST);
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var cards = document.querySelectorAll('.entry');
-    if (cards.length){
-      gl.enable(gl.SCISSOR_TEST);
-      for (var i = 0; i < cards.length; i++){
-        var el = cards[i];
-        var rect = el.getBoundingClientRect();
-        if (rect.bottom < 0 || rect.top > window.innerHeight || rect.width <= 0 || rect.height <= 0) continue;
-
-        var x = Math.round(rect.left * dpr);
-        var w = Math.round(rect.width * dpr);
-        var h = Math.round(rect.height * dpr);
-        var y = canvas.height - Math.round(rect.bottom * dpr);
-        gl.viewport(x, y, w, h);
-        gl.scissor(x, y, w, h);
-
-        var seed = hashStr(el.dataset.title || el.dataset.id || '');
-        var pair = PALETTE_RGB[seed % PALETTE_RGB.length];
-        gl.uniform3f(uniforms.u_color1, pair[0][0], pair[0][1], pair[0][2]);
-        gl.uniform3f(uniforms.u_color2, pair[1][0], pair[1][1], pair[1][2]);
-        gl.uniform3f(uniforms.u_color3, PAPER_RGB[0], PAPER_RGB[1], PAPER_RGB[2]);
-        gl.uniform1f(uniforms.u_time, elapsed);
-        gl.uniform1f(uniforms.u_seed, (seed % 1000) / 1000 * 10.0);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      }
-      gl.disable(gl.SCISSOR_TEST);
-    }
-
+    gl.uniform1f(uniforms.u_time, now - startTime);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     requestAnimationFrame(frame);
   }
 
