@@ -30,15 +30,15 @@
   .wrap{max-width:1180px;margin:0 auto;padding:56px 24px 120px;}
 
   .masthead{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:end;
+    column-gap:16px;
     border-bottom:3px solid var(--ink);
     padding-bottom:22px;
     margin-bottom:8px;
   }
-  .masthead-title{}
+  .masthead-title{grid-column:2;text-align:center;min-width:0;}
   .masthead h1{
     font-family:'Fraunces', serif;
     font-weight:700;
@@ -62,14 +62,20 @@
   }
   .about-toggle:hover{background:var(--paper-2);}
   .masthead-meta{
+    grid-column:3;
+    justify-self:end;
+    text-align:right;
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
     letter-spacing:0.06em;
     color:var(--muted);
     text-transform:uppercase;
     line-height:1.6;
-    margin-bottom:12px;
   }
+  /* Invisible twin of masthead-meta in column 1, kept in sync via JS, so its column always
+     matches the real meta's width exactly — that's what keeps the title truly centered
+     instead of drifting toward the empty side. */
+  .masthead-meta-mirror{grid-column:1;justify-self:start;text-align:left;visibility:hidden;}
   .tagline-row{
     position:relative;
     display:flex;
@@ -373,6 +379,10 @@
   }
 
   @media (max-width:560px){
+    .masthead{grid-template-columns:1fr;justify-items:center;row-gap:10px;}
+    .masthead-title{grid-column:1;order:2;}
+    .masthead-meta{grid-column:1;order:1;justify-self:center;text-align:center;}
+    .masthead-meta-mirror{display:none;}
     .entry-row{grid-template-columns:84px 20px 1fr;}
     .entry-art{width:84px;height:84px;font-size:24px;}
     .entry-art.fit{max-width:150px;}
@@ -471,10 +481,11 @@
 <div class="wrap">
 
   <div class="masthead">
-    <div class="masthead-meta" id="mastheadMeta">Vol. I &mdash; Entry &hellip;<br>Est. MMXXVI</div>
+    <div class="masthead-meta masthead-meta-mirror" id="mastheadMetaMirror" aria-hidden="true">Vol. I &mdash; Entry &hellip;<br>Est. MMXXVI</div>
     <div class="masthead-title">
       <h1><span id="mastheadH1Text">Commonplace</span><canvas id="liquidLogoCanvas" aria-hidden="true"></canvas></h1>
     </div>
+    <div class="masthead-meta" id="mastheadMeta">Vol. I &mdash; Entry &hellip;<br>Est. MMXXVI</div>
   </div>
   <div class="tagline-row">
     <div class="tagline">Things I've watched, listened, read, ate, and thought.</div>
@@ -723,6 +734,7 @@ const entriesEl = document.getElementById('entries');
 const emptyEl = document.getElementById('empty');
 const loadingEl = document.getElementById('loadingMsg');
 const mastheadMeta = document.getElementById('mastheadMeta');
+const mastheadMetaMirror = document.getElementById('mastheadMetaMirror');
 
 async function loadEntries(){
   loadingEl.style.display = 'block';
@@ -731,6 +743,7 @@ async function loadEntries(){
   DATA = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   loadingEl.style.display = 'none';
   mastheadMeta.innerHTML = `Vol. I &mdash; Entry ${toRoman(DATA.length)}<br>Est. MMXXVI`;
+  mastheadMetaMirror.innerHTML = mastheadMeta.innerHTML;
   document.getElementById('marginEntryCount').textContent = toRoman(DATA.length);
   sizeMarginEntryCount();
   render();
