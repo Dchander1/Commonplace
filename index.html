@@ -158,7 +158,6 @@
     border:1px solid var(--rule);
     border-radius:8px;
     padding:10px;
-    background:#F5F3EC;
     margin-bottom:20px;
     break-inside:avoid;
     transition:transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -205,8 +204,18 @@
   .filter-btn.active{background:var(--ink);color:var(--paper);}
   .filter-btn:hover:not(.active){background:var(--paper-2);}
 
-  .entry{border-bottom:1px solid var(--rule);padding:22px 0;cursor:pointer;}
+  .entry{border-bottom:1px solid var(--rule);padding:22px 0;cursor:pointer;position:relative;}
   .entry:first-of-type{border-top:1px solid var(--rule);}
+  /* The animated shader-gradient canvas sits fixed behind the whole page (z-index:-1) with a
+     matching color per entry; this translucent paper wash is what actually shows on the card
+     itself, so text stays legible while photo letterbox gaps and padding gutters still read as
+     a softly tinted version of that card's color. Real content (photo, text) paints above it
+     since pseudo-elements paint first within their own box, no z-index needed on the rest. */
+  .entry::before{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:rgba(239,237,230,0.68);backdrop-filter:blur(4px);pointer-events:none;
+  }
+  #cardGradientCanvas{position:fixed;inset:0;z-index:-1;pointer-events:none;}
   .entry-row{display:grid;grid-template-columns:132px 30px 1fr auto auto;align-items:start;gap:16px;}
   .entry-art{
     width:132px;height:132px;border-radius:4px;display:flex;align-items:center;justify-content:center;
@@ -841,6 +850,7 @@ function render(){
     const entry = document.createElement('div');
     entry.className = 'entry';
     entry.dataset.id = d.id;
+    entry.dataset.title = d.title || '';
     entry.innerHTML = `
       <div class="entry-row">
         <div class="${artClass}" ${artStyle}>${artInner}</div>
@@ -1351,8 +1361,8 @@ loadEntries();
     // noticeably thinner than the plain bold text it replaces. Embolden the source shape itself
     // (stamp it at several small offsets around a circle, like a synthetic-bold dilation) so the
     // final liquid-metal glyphs come out just as thick.
-    var emboldenRadius = fontSize * 0.045;
-    var emboldenSteps = 16;
+    var emboldenRadius = fontSize * 0.015;
+    var emboldenSteps = 8;
     for (var i = 0; i < emboldenSteps; i++){
       var angle = (i / emboldenSteps) * Math.PI * 2;
       ctx.fillText(text, canvas.width / 2 + Math.cos(angle) * emboldenRadius, canvas.height / 2 + Math.sin(angle) * emboldenRadius);
