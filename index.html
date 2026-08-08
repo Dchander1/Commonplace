@@ -160,11 +160,11 @@
   .search-bar input{
     display:block;width:100%;-webkit-appearance:none;appearance:none;
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.04em;
-    padding:9px 14px;border:none;background:#fff;color:#221C30;
+    padding:9px 14px;border:none;background:var(--surface-2);color:var(--text);
   }
   .search-bar input::-webkit-search-cancel-button{-webkit-appearance:none;}
-  .search-bar input::placeholder{color:#8A8496;}
-  .search-bar input:focus{outline:none;background:#EFEDF5;}
+  .search-bar input::placeholder{color:var(--muted);}
+  .search-bar input:focus{outline:none;background:var(--surface);}
 
   .toolbar{
     display:flex;
@@ -451,15 +451,15 @@
     position:fixed;left:22px;top:50%;transform:translateY(-50%);
     writing-mode:vertical-rl;
     font-family:'IBM Plex Mono', monospace;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
-    color:var(--muted);opacity:0.55;
+    color:var(--accent);opacity:0.55;
     pointer-events:none;z-index:-1;
   }
   .deco-ruler{
     display:none;
     position:fixed;left:10px;top:70px;bottom:70px;width:10px;
     background:
-      linear-gradient(var(--muted), var(--muted)) no-repeat left/1px 100%,
-      repeating-linear-gradient(to bottom, var(--muted) 0, var(--muted) 1px, transparent 1px, transparent 36px);
+      linear-gradient(var(--accent), var(--accent)) no-repeat left/1px 100%,
+      repeating-linear-gradient(to bottom, var(--accent) 0, var(--accent) 1px, transparent 1px, transparent 36px);
     opacity:0.5;
     pointer-events:none;z-index:-1;
   }
@@ -467,15 +467,15 @@
     display:none;
     position:fixed;right:-4vw;top:80px;
     font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);line-height:1;
-    color:var(--muted);opacity:0.3;white-space:nowrap;
+    color:var(--accent);opacity:0.3;white-space:nowrap;
     pointer-events:none;z-index:-1;
   }
   .deco-hairline{
     display:none;
     position:fixed;right:20px;top:70px;bottom:70px;width:5px;
     background:
-      linear-gradient(var(--muted), var(--muted)) no-repeat left/1px 100%,
-      linear-gradient(var(--muted), var(--muted)) no-repeat right/1px 100%;
+      linear-gradient(var(--accent), var(--accent)) no-repeat left/1px 100%,
+      linear-gradient(var(--accent), var(--accent)) no-repeat right/1px 100%;
     opacity:0.4;
     pointer-events:none;z-index:-1;
   }
@@ -483,20 +483,20 @@
     display:none;
     position:fixed;left:22px;top:26px;
     font-family:'Fraunces', serif;font-style:italic;font-weight:500;font-size:13px;letter-spacing:0.06em;
-    color:var(--muted);opacity:0.4;
+    color:var(--accent);opacity:0.4;
     pointer-events:none;z-index:-1;
   }
   .deco-crop-top{
     display:none;
     position:fixed;top:20px;right:20px;width:14px;height:14px;
-    border-top:1px solid var(--muted);border-right:1px solid var(--muted);
+    border-top:1px solid var(--accent);border-right:1px solid var(--accent);
     opacity:0.4;
     pointer-events:none;z-index:-1;
   }
   .deco-crop-bottom{
     display:none;
     position:fixed;bottom:20px;right:20px;width:14px;height:14px;
-    border-bottom:1px solid var(--muted);border-right:1px solid var(--muted);
+    border-bottom:1px solid var(--accent);border-right:1px solid var(--accent);
     opacity:0.4;
     pointer-events:none;z-index:-1;
   }
@@ -505,7 +505,7 @@
     position:fixed;left:-0.3em;bottom:80px;
     writing-mode:vertical-rl;
     font-family:'Fraunces', serif;font-weight:600;font-size:min(42vw, 560px);letter-spacing:0.04em;
-    color:var(--muted);opacity:0.3;
+    color:var(--accent);opacity:0.3;
     user-select:none;pointer-events:none;z-index:-1;line-height:1;
   }
   @media (min-width:1300px){
