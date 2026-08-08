@@ -14,7 +14,7 @@
     --surface-2:#2C2440; /* slightly lighter plum — hover states on dark surfaces */
     --text:#F4F1E9;       /* warm off-white — primary text, and the fill for solid pills */
     --muted:#9C93A8;      /* muted lavender-gray — secondary text, subtext, decorative marks */
-    --accent:#C9A876;     /* gold — ONLY: the "what is this" pill, the "+ New Entry" pill, stamp badges, and the card border */
+    --accent:#C9A876;     /* gold — primary accent, used across toggles, buttons, borders, and active states */
     --rule:rgba(244,241,233,0.16); /* subtle divider on dark surfaces */
     --error:#E0785A;      /* delete/error state, lightened from the old brick red for dark-bg contrast */
   }
@@ -80,7 +80,7 @@
     display:flex;
     justify-content:space-between;
     align-items:flex-end;
-    border-bottom:3px solid var(--text);
+    border-bottom:3px solid var(--accent);
     padding-bottom:22px;
     margin-bottom:8px;
   }
@@ -89,7 +89,7 @@
     font-family:'Fraunces', serif;
     font-weight:600;
     color:#C9A876;
-    font-size:clamp(64px, 13vw, 132px);
+    font-size:clamp(52px, 11vw, 108px);
     letter-spacing:-0.01em;
     line-height:1;
     margin:0;
@@ -155,7 +155,8 @@
 
   /* Same box model as .filters/.view-toggle (bordered wrapper + border:none inner buttons/input,
      identical font-size and padding) so all three toolbar pieces line up at the same height */
-  .search-bar{border:1px solid var(--text);width:220px;max-width:100%;flex:0 0 auto;}
+  .search-bar{border:1px solid var(--accent);width:220px;max-width:100%;flex:0 0 auto;transition:border-color 0.15s ease;}
+  .search-bar:focus-within{border-color:#E0C58F;}
   .search-bar input{
     display:block;width:100%;-webkit-appearance:none;appearance:none;
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.04em;
@@ -173,7 +174,7 @@
     gap:12px;
     margin-bottom:16px;
   }
-  .view-toggle{display:flex;border:1.5px solid var(--text);width:fit-content;max-width:100%;}
+  .view-toggle{display:flex;border:1.5px solid var(--accent);width:fit-content;max-width:100%;}
   .view-btn{
     font-family:'IBM Plex Mono', monospace;
     font-size:11px;
@@ -185,7 +186,7 @@
     cursor:pointer;
     color:var(--text);
   }
-  .view-btn.active{background:var(--text);color:var(--surface);}
+  .view-btn.active{background:var(--accent);color:var(--surface);}
 
   /* True masonry: each tile keeps its photo's real proportions (a movie poster and an album
      cover end up different heights), packed into columns via CSS multi-column layout — no
@@ -236,14 +237,14 @@
   #entries.view-grid .stamp:focus{background:#D8BD91;}
   #entries.view-grid .stamp:empty:not(:focus){display:none;}
 
-  .filters{display:flex;gap:2px;border:1.5px solid var(--text);width:fit-content;max-width:100%;flex-wrap:wrap;}
+  .filters{display:flex;gap:2px;border:1.5px solid var(--accent);width:fit-content;max-width:100%;flex-wrap:wrap;}
   .filter-btn{
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;
-    background:transparent;border:none;border-right:1px solid var(--text);padding:9px 16px;cursor:pointer;color:var(--text);
+    background:transparent;border:none;border-right:1px solid var(--accent);padding:9px 16px;cursor:pointer;color:var(--text);
   }
   .filter-btn:last-child{border-right:none;}
-  .filter-btn.active{background:var(--text);color:var(--surface);}
-  .filter-btn:hover:not(.active){background:var(--surface-2);}
+  .filter-btn.active{background:var(--accent);color:var(--surface);}
+  .filter-btn:hover:not(.active){background:rgba(201,168,118,0.15);}
 
   .entry{background:#221C30;border-bottom:1px solid var(--rule);padding:22px 0;cursor:pointer;position:relative;}
   .entry:first-of-type{border-top:1px solid var(--rule);}
@@ -303,7 +304,7 @@
     z-index:50;
   }
   .auth-toggle{
-    background:var(--text);color:var(--surface);border:none;padding:8px 14px;border-radius:999px;cursor:pointer;
+    background:var(--accent);color:var(--surface);border:none;padding:8px 14px;border-radius:999px;cursor:pointer;
     box-shadow:0 4px 12px rgba(0,0,0,0.18);
   }
   .auth-panel{
@@ -317,7 +318,7 @@
   }
   .auth-panel button{
     width:100%;font-family:'IBM Plex Mono', monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;
-    padding:8px;border:1px solid var(--text);background:var(--text);color:var(--surface);border-radius:4px;cursor:pointer;
+    padding:8px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:4px;cursor:pointer;
   }
   .auth-status{font-size:10px;color:var(--muted);margin-top:8px;text-align:center;}
   .auth-error{font-size:10px;color:var(--error);margin-top:6px;}
@@ -342,7 +343,7 @@
   .add-entry-form textarea{min-height:70px;resize:vertical;}
   .add-entry-form button{
     font-family:'IBM Plex Mono', monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;
-    background:var(--text);color:var(--surface);border:none;padding:10px;border-radius:4px;cursor:pointer;width:fit-content;
+    background:var(--accent);color:var(--surface);border:none;padding:10px;border-radius:4px;cursor:pointer;width:fit-content;
   }
   .form-actions{display:flex;gap:10px;align-items:center;}
   .form-cancel-btn{background:transparent;color:var(--muted);border:1px solid var(--rule);}
@@ -377,10 +378,10 @@
   /* Article view */
   .back-link{
     font-family:'IBM Plex Mono', monospace;font-size:11.5px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
-    background:var(--text);color:var(--surface);border:none;cursor:pointer;padding:10px 18px;border-radius:999px;
+    background:var(--accent);color:var(--surface);border:none;cursor:pointer;padding:10px 18px;border-radius:999px;
     margin-bottom:28px;display:flex;width:fit-content;align-items:center;gap:6px;
   }
-  .back-link:hover{background:var(--muted);}
+  .back-link:hover{background:#E0C58F;}
   /* Hero floats left so title/verdict/note wrap beside it, then drop to a full-width
      line once they've written past the image's height. #articleView::after clears it. */
   .article-hero{
@@ -415,9 +416,10 @@
   .article-admin .delete-btn{margin-top:0;}
   .edit-toggle{
     font-family:'IBM Plex Mono', monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
-    background:transparent;border:1px solid var(--muted);color:var(--muted);padding:8px 14px;
+    background:transparent;border:1px solid var(--accent);color:var(--accent);padding:8px 14px;
     border-radius:4px;cursor:pointer;
   }
+  .edit-toggle:hover{background:rgba(201,168,118,0.15);}
 
   .loading-msg{
     font-family:'IBM Plex Mono', monospace;font-size:11px;color:var(--muted);text-transform:uppercase;
@@ -430,7 +432,7 @@
     /* The main clamp()'s 64px floor doesn't shrink further no matter how narrow the
        viewport gets — on real phones (~375px) that overflows past the edge, invisibly,
        since overflow-x:hidden swallows it instead of showing a scrollbar. */
-    .masthead h1{font-size:clamp(40px, 13vw, 60px);}
+    .masthead h1{font-size:clamp(36px, 12vw, 52px);}
     .masthead-meta{text-align:left;}
     .entry-row{grid-template-columns:84px 20px 1fr;}
     .entry-art{width:84px;height:84px;font-size:24px;}
@@ -441,7 +443,7 @@
     .stamp{grid-column:2 / -1;margin-top:8px;justify-self:start;}
   }
 
-  :focus-visible{outline:2px solid var(--text);outline-offset:2px;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
   /* Purely decorative margin elements — hidden below 1300px, never interactive, always behind content */
   .deco-spine{
